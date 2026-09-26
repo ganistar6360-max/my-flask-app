@@ -75,8 +75,8 @@ def forgot_password():
             accounts.update_one({'email': email}, {'$set': {'reset_token': token}})
             reset_link = url_for('reset_password', token=token, _external=True)
             message = Message('Password Reset Request',
-                            sender='your_gmail@gmail.com',
-                            recipients=[email])
+                sender='ganistar6360@gmail.com',
+                recipients=[email])
             message.body = f'Click this link to reset your password: {reset_link}'
             mail.send(message)
             msg = 'Reset link sent to your email!'
@@ -101,4 +101,4 @@ def reset_password(token):
     return render_template('reset_password.html', msg=msg, token=token)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)
