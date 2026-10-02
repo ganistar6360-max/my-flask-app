@@ -1,0 +1,84 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ hall.name }} - Details & Map{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="/halls" class="text-primary text-decoration-none small fw-semibold">
+        <i class="fas fa-arrow-left me-1"></i> Back to Halls Directory
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <div class="civic-card p-0 overflow-hidden mb-4">
+            <img src="{{ hall.image_url }}" alt="{{ hall.name }}" style="width:100%; height:280px; object-fit:cover;">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="fw-bold text-dark mb-0">{{ hall.name }}</h3>
+                    <span class="badge {% if hall.status == 'available' %}bg-success{% else %}bg-danger{% endif %} text-uppercase fs-6">
+                        {{ hall.status }}
+                    </span>
+                </div>
+                <p class="text-muted mb-3">
+                    <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ hall.address or hall.location }}
+                </p>
+                <div class="d-flex gap-2 mb-3">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ hall.latitude }},{{ hall.longitude }}" target="_blank" class="btn btn-sm btn-primary">
+                        <i class="fas fa-diamond-turn-right me-1"></i> Get Directions on Google Maps
+                    </a>
+                </div>
+                <h6 class="text-dark fw-bold text-uppercase small mt-3">Facility Overview</h6>
+                <p class="text-secondary" style="line-height:1.7;">{{ hall.description }}</p>
+            </div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="civic-card">
+            <h5 class="fw-bold text-dark mb-3"><i class="fas fa-concierge-bell text-primary me-2"></i>Available Civic Infrastructure</h5>
+            <div class="row g-2">
+                {% for a in amenities %}
+                <div class="col-6 col-md-4">
+                    <div class="p-2 px-3 rounded bg-light border small text-dark fw-semibold">
+                        <i class="fas fa-check-circle text-success me-2"></i>{{ a }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Sidebar -->
+    <div class="col-12 col-lg-4">
+        <div class="civic-card sticky-top" style="top:85px;">
+            <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">Booking Tariff</h5>
+            
+            <div class="p-3 bg-light rounded border mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Standard Tariff:</span>
+                    <strong class="text-primary fs-5">₹{{ hall.price_per_hour|int }} / hr</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Seating Capacity:</span>
+                    <strong class="text-dark">{{ hall.capacity }} Persons</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Facility Code:</span>
+                    <span class="badge bg-secondary font-monospace">HALL-00{{ hall.id }}</span>
+                </div>
+            </div>
+
+            {% if hall.status == 'available' %}
+            <a href="/book/{{ hall.id }}" class="btn btn-civic w-100 justify-content-center py-2 mb-2">
+                <i class="fas fa-calendar-check me-1"></i> Proceed to Book Slot
+            </a>
+            {% else %}
+            <button class="btn btn-secondary w-100 py-2 mb-2" disabled>Under Scheduled Maintenance</button>
+            {% endif %}
+
+            <a href="/availability?hall_id={{ hall.id }}" class="btn btn-outline-secondary w-100 btn-sm">
+                <i class="fas fa-calendar-alt me-1"></i> Check Existing Slots
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

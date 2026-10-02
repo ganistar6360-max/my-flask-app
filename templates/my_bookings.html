@@ -1,0 +1,191 @@
+﻿{% extends "base.html" %}
+{% block title %}My Bookings - Municipal Community Halls{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="fas fa-receipt text-primary me-2"></i>My Hall Reservations & Passes</h3>
+        <p class="text-muted small mb-0">Track verification status, view digital entry passes, or get GPS directions to the venue</p>
+    </div>
+    <div class="mt-2 mt-md-0">
+        <a href="/halls" class="btn btn-civic btn-sm">
+            <i class="fas fa-plus me-1"></i> New Hall Reservation
+        </a>
+    </div>
+</div>
+
+<div class="civic-card p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table-civic">
+            <thead>
+                <tr>
+                    <th>Booking Ref</th>
+                    <th>Facility & Location</th>
+                    <th>Date & Time Slot</th>
+                    <th>Purpose</th>
+                    <th>Tariff</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if bookings %}
+                    {% for b in bookings %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-light text-primary border font-monospace">{{ b.booking_ref }}</span>
+                            <div class="text-muted small" style="font-size:0.7rem;">{{ b.created_at }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ b.hall_name }}</div>
+                            <div class="text-muted small" style="font-size:0.75rem;">
+                                <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ b.hall_address or b.hall_location }}
+                            </div>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination={{ b.latitude }},{{ b.longitude }}" target="_blank" class="small text-primary text-decoration-none fw-semibold">
+                                <i class="fas fa-diamond-turn-right me-1"></i> Directions
+                            </a>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark small">{{ b.booking_date }}</div>
+                            <div class="text-muted small">{{ b.start_time }} - {{ b.end_time }} ({{ b.hours }}h)</div>
+                        </td>
+                        <td>
+                            <div class="text-dark small text-truncate" style="max-width:180px;" title="{{ b.purpose }}">{{ b.purpose }}</div>
+                            <div class="text-muted small" style="font-size:0.72rem;">{{ b.attendees }} Attendees</div>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-dark">₹{{ b.total_cost|int }}</span>
+                        </td>
+                        <td>
+                            <span class="badge {% if b.status == 'approved' %}bg-success{% elif b.status == 'pending' %}bg-warning text-dark{% elif b.status == 'cancelled' %}bg-secondary{% else %}bg-danger{% endif %} text-uppercase">
+                                {{ b.status }}
+                            </span>
+                            {% if b.reject_reason %}
+                            <div class="text-danger small mt-1" style="font-size:0.7rem;">
+                                Note: {{ b.reject_reason }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewReceipt({{ b|tojson }})" style="font-size:0.78rem;">
+                                    <i class="fas fa-id-card me-1"></i> Pass
+                                </button>
+                                {% if b.status in ['pending', 'approved'] %}
+                                <form method="POST" action="/cancel-booking/{{ b.id }}" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size:0.78rem;">
+                                        Cancel
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fas fa-calendar-times fa-3x mb-3 text-secondary opacity-50 d-block"></i>
+                            <h5 class="text-dark">No Hall Bookings Found</h5>
+                            <p class="small text-muted mb-3">You haven't reserved any municipal halls yet.</p>
+                            <a href="/halls" class="btn btn-civic btn-sm">Explore Community Halls</a>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Printable Digital Pass Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark" style="font-size:1rem;">
+                    <i class="fas fa-landmark text-primary me-2"></i>Official Municipal Booking Pass
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="receiptBody">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewReceipt(booking) {
+    const body = document.getElementById("receiptBody");
+    body.innerHTML = `
+        <div class="text-center pb-3 mb-3 border-bottom">
+            <div class="d-inline-flex p-2 rounded bg-light text-primary mb-2 fs-4">
+                <i class="fas fa-building-columns"></i>
+            </div>
+            <h5 class="fw-bold mb-0 text-dark">City Municipal Corporation</h5>
+            <div class="small text-muted">Public Community Hall Reservation Department</div>
+            <div class="badge bg-primary mt-2">REF: ${booking.booking_ref}</div>
+        </div>
+
+        <table class="table table-sm table-borderless small mb-3">
+            <tbody>
+                <tr>
+                    <td class="text-muted">Reserved Facility:</td>
+                    <td class="text-end fw-bold text-dark">${booking.hall_name}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Address / Ward:</td>
+                    <td class="text-end text-dark">${booking.hall_address || booking.hall_location}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Applicant:</td>
+                    <td class="text-end text-dark">${booking.username} (${booking.email})</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Event Date:</td>
+                    <td class="text-end fw-bold text-dark">${booking.booking_date}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Allocated Slot:</td>
+                    <td class="text-end text-primary fw-bold">${booking.start_time} - ${booking.end_time} (${booking.hours} hrs)</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Purpose:</td>
+                    <td class="text-end text-dark">${booking.purpose}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Expected Attendance:</td>
+                    <td class="text-end text-dark">${booking.attendees} Persons</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Verification Status:</td>
+                    <td class="text-end fw-bold text-uppercase ${booking.status === 'approved' ? 'text-success' : 'text-warning'}">${booking.status}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="p-3 bg-light rounded text-center border mb-3">
+            <div class="small text-muted text-uppercase">Total Municipal Tariff Charged</div>
+            <div class="fs-3 fw-bold text-primary">₹${booking.total_cost}</div>
+            <small class="text-success fw-semibold"><i class="fas fa-shield-alt me-1"></i>Civic Allocation Verified</small>
+        </div>
+
+        <div class="text-center">
+            <a href="https://www.google.com/maps/dir/?api=1&destination=${booking.latitude},${booking.longitude}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-diamond-turn-right me-1"></i> Open Venue Navigation on Google Maps
+            </a>
+        </div>
+    `;
+    const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

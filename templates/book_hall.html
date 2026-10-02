@@ -1,0 +1,168 @@
+﻿{% extends "base.html" %}
+{% block title %}Book {{ hall.name }} - Municipal Community Halls{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="/halls" class="text-primary text-decoration-none small fw-semibold">
+        <i class="fas fa-arrow-left me-1"></i> Back to Halls Directory & Map
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Booking Form -->
+    <div class="col-12 col-lg-8">
+        <div class="civic-card">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <div>
+                    <h4 class="fw-bold text-dark mb-1">Public Hall Reservation Application</h4>
+                    <span class="text-muted small">Municipal Civic Asset Allocation Form</span>
+                </div>
+                <span class="badge bg-primary fs-6">Official Tariff: ₹{{ hall.price_per_hour|int }}/hr</span>
+            </div>
+
+            {% if msg %}
+            <div class="alert alert-danger py-2 px-3 small mb-4">
+                <i class="fas fa-exclamation-triangle me-1"></i> {{ msg }}
+            </div>
+            {% endif %}
+
+            <form method="POST" id="bookingForm">
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label-civic">Event Date <span class="text-danger">*</span></label>
+                        <input type="date" name="booking_date" id="booking_date" class="form-control form-control-civic" min="{{ today }}" value="{{ today }}" required>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label-civic">Start Time <span class="text-danger">*</span></label>
+                        <input type="time" name="start_time" id="start_time" class="form-control form-control-civic" value="09:00" required>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label-civic">End Time <span class="text-danger">*</span></label>
+                        <input type="time" name="end_time" id="end_time" class="form-control form-control-civic" value="13:00" required>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-8">
+                        <label class="form-label-civic">Event Purpose / Title <span class="text-danger">*</span></label>
+                        <input type="text" name="purpose" class="form-control form-control-civic" placeholder="e.g. Annual Youth Skill Workshop, Cultural Fest, Society Meeting" required>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label-civic">Expected Attendees <span class="text-danger">*</span></label>
+                        <input type="number" name="attendees" class="form-control form-control-civic" min="1" max="{{ hall.capacity }}" value="50" required>
+                        <div class="form-text small" style="font-size:0.75rem;">Max hall capacity: {{ hall.capacity }} seats</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label-civic">Special Arrangements or Audio/Visual Equipment (Optional)</label>
+                    <textarea name="special_requirements" class="form-control form-control-civic" rows="3" placeholder="e.g. Stage lighting, podium microphones, projector screen, catering counter setup..."></textarea>
+                </div>
+
+                <div class="bg-light p-3 rounded mb-4 border">
+                    <div class="row small g-2">
+                        <div class="col-6">
+                            <span class="text-muted d-block">Applicant Name:</span>
+                            <strong class="text-dark">{{ session.username }}</strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted d-block">Official Email:</span>
+                            <strong class="text-dark">{{ session.email }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-civic w-100 justify-content-center py-2 fs-6">
+                    <i class="fas fa-check-circle me-1"></i> Submit Hall Booking Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Facility Summary & Live Tariff Card -->
+    <div class="col-12 col-lg-4">
+        <div class="civic-card sticky-top" style="top:85px;">
+            <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">Selected Facility Summary</h6>
+            
+            <div class="rounded overflow-hidden mb-3 border shadow-sm">
+                <img src="{{ hall.image_url }}" alt="{{ hall.name }}" style="width:100%; height:140px; object-fit:cover;">
+                <div class="p-3 bg-white">
+                    <h6 class="fw-bold text-dark mb-1">{{ hall.name }}</h6>
+                    <p class="small text-muted mb-2">
+                        <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ hall.address or hall.location }}
+                    </p>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ hall.latitude }},{{ hall.longitude }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-diamond-turn-right me-1"></i> View Route on Google Maps
+                    </a>
+                </div>
+            </div>
+
+            <!-- Calculation Box -->
+            <div class="p-3 bg-light rounded border mb-3">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Base Hourly Rate:</span>
+                    <span class="fw-bold text-dark">₹{{ hall.price_per_hour|int }} / hr</span>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <span>Calculated Duration:</span>
+                    <span class="fw-bold text-dark" id="calcHours">4.0 Hours</span>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-2">
+                    <span>Civic Maintenance Fee:</span>
+                    <span class="text-success fw-bold">FREE (Municipal Subsidy)</span>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark">Total Fee:</span>
+                    <span class="text-primary fw-bolder fs-4" id="calcTotal">₹{{ (hall.price_per_hour * 4)|int }}</span>
+                </div>
+            </div>
+
+            <div class="small text-muted" style="font-size:0.75rem;">
+                <i class="fas fa-info-circle text-primary me-1"></i> <strong>Automated Verification:</strong>
+                Slot collisions are blocked automatically. Municipal officers review applications within 24 working hours.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const startTimeInput = document.getElementById("start_time");
+    const endTimeInput = document.getElementById("end_time");
+    const calcHoursSpan = document.getElementById("calcHours");
+    const calcTotalSpan = document.getElementById("calcTotal");
+    const ratePerHour = {{ hall.price_per_hour }};
+
+    function updateCalculations() {
+        const start = startTimeInput.value;
+        const end = endTimeInput.value;
+        if (!start || !end) return;
+
+        const [sH, sM] = start.split(":").map(Number);
+        const [eH, eM] = end.split(":").map(Number);
+
+        let sMin = sH * 60 + sM;
+        let eMin = eH * 60 + eM;
+
+        if (eMin > sMin) {
+            let diffHours = (eMin - sMin) / 60.0;
+            if (diffHours < 1.0) diffHours = 1.0;
+            diffHours = Math.round(diffHours * 100) / 100;
+            calcHoursSpan.textContent = diffHours.toFixed(1) + " Hours";
+            const total = Math.round(diffHours * ratePerHour);
+            calcTotalSpan.textContent = "₹" + total;
+        } else {
+            calcHoursSpan.textContent = "Invalid Time";
+            calcTotalSpan.textContent = "₹0";
+        }
+    }
+
+    startTimeInput.addEventListener("change", updateCalculations);
+    endTimeInput.addEventListener("change", updateCalculations);
+    updateCalculations();
+});
+</script>
+{% endblock %}

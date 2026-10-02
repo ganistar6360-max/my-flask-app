@@ -1,0 +1,355 @@
+﻿{% extends "base.html" %}
+{% block title %}Community Halls & Map Directory{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="fas fa-building text-primary me-2"></i>Municipal Community Halls Directory</h3>
+        <p class="text-muted small mb-0">Browse public auditoriums, locate facilities on the interactive map, and calculate distance from your location</p>
+    </div>
+    <div class="mt-2 mt-md-0 d-flex gap-2">
+        <button id="locateBtn" class="btn btn-civic-green shadow-sm" onclick="findNearestHalls()">
+            <i class="fas fa-location-crosshairs me-1"></i> Detect My Location / Find Nearest
+        </button>
+    </div>
+</div>
+
+<!-- Location Status Banner (Dynamic) -->
+<div id="locationAlert" class="alert alert-info py-2 px-3 small d-none align-items-center justify-content-between mb-3 shadow-sm">
+    <div id="locationAlertText">
+        <i class="fas fa-spinner fa-spin me-2"></i> Detecting your GPS location...
+    </div>
+    <button type="button" class="btn-close btn-sm" onclick="document.getElementById('locationAlert').classList.add('d-none')"></button>
+</div>
+
+<!-- Interactive Map Container (Section 13 of Syllabus) -->
+<div class="civic-card p-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="fw-bold text-dark small text-uppercase">
+            <i class="fas fa-map-marked-alt text-primary me-1"></i> Interactive Facility Map (OpenStreetMap & Google Maps Directions)
+        </div>
+        <div class="small text-muted">
+            <span class="badge bg-primary">4 Facilities Pinned</span>
+        </div>
+    </div>
+    <div id="hallsMap"></div>
+</div>
+
+<!-- Search & Filter Controls -->
+<div class="civic-card p-3 mb-4">
+    <form method="GET" action="/halls" class="row g-2 align-items-center">
+        <div class="col-12 col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" value="{{ query or '' }}" class="form-control form-control-civic" placeholder="Search by name, address, or landmark...">
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <select name="capacity" class="form-select form-control-civic">
+                <option value="">All Seating Capacities</option>
+                <option value="small" {% if capacity == 'small' %}selected{% endif %}>Mini Hall (&le; 50 Seats)</option>
+                <option value="medium" {% if capacity == 'medium' %}selected{% endif %}>Mid Size (51 - 200 Seats)</option>
+                <option value="large" {% if capacity == 'large' %}selected{% endif %}>Grand Auditorium (> 200 Seats)</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <button type="submit" class="btn btn-civic w-100 justify-content-center">
+                <i class="fas fa-filter me-1"></i> Filter
+            </button>
+        </div>
+        <div class="col-12 col-md-2 text-md-end">
+            <a href="/halls" class="btn btn-outline-secondary w-100 btn-sm py-2">Reset Filters</a>
+        </div>
+    </form>
+</div>
+
+<!-- Halls List Container (Can be re-ordered dynamically by proximity) -->
+<div class="row g-4" id="hallsContainer">
+    {% for hall in halls %}
+    <div class="col-12 col-md-6 col-lg-6 hall-card-wrapper" 
+         data-id="{{ hall.id }}"
+         data-lat="{{ hall.latitude }}" 
+         data-lng="{{ hall.longitude }}" 
+         data-name="{{ hall.name }}"
+         data-distance="999999">
+        <div class="hall-item-card">
+            <div class="hall-thumb" style="background-image: url('{{ hall.image_url }}');">
+                <div class="hall-thumb-badge">
+                    <span class="badge {% if hall.status == 'available' %}bg-success{% else %}bg-danger{% endif %} text-uppercase shadow-sm">
+                        {{ hall.status }}
+                    </span>
+                </div>
+                <div class="hall-thumb-distance" id="distanceTag-{{ hall.id }}">
+                    <i class="fas fa-map-pin me-1 text-warning"></i> {{ hall.location }}
+                </div>
+            </div>
+
+            <div class="p-3 d-flex flex-column flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h5 class="fw-bold text-dark mb-0">{{ hall.name }}</h5>
+                </div>
+                <div class="text-secondary small mb-2">
+                    <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ hall.address or hall.location }}
+                </div>
+                <p class="text-muted small mb-3 flex-grow-1" style="font-size:0.84rem; line-height:1.5;">
+                    {{ hall.description }}
+                </p>
+
+                <!-- Amenities Tags -->
+                <div class="mb-3">
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for am in hall.amenities.split(',') %}
+                        <span class="badge bg-light text-dark border small" style="font-weight:500;">
+                            <i class="fas fa-check text-success me-1"></i>{{ am.strip() }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Tariff & Actions Footer -->
+                <div class="pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div>
+                        <div class="small text-muted" style="font-size:0.75rem;">CAPACITY & TARIFF</div>
+                        <div class="text-dark fw-bold">
+                            <i class="fas fa-users text-primary me-1"></i>{{ hall.capacity }} Seats
+                            <span class="mx-1">&bull;</span>
+                            <span class="text-primary fs-6">₹{{ hall.price_per_hour|int }}</span><small class="text-muted">/hr</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <!-- Direct Google Maps Direction Link -->
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ hall.latitude }},{{ hall.longitude }}" 
+                           target="_blank" 
+                           class="btn btn-outline-primary btn-sm" 
+                           title="Open Driving & Walking Directions in Google Maps">
+                            <i class="fas fa-diamond-turn-right text-primary me-1"></i> Google Maps
+                        </a>
+
+                        <!-- Zoom to Map Marker -->
+                        <button type="button" 
+                                class="btn btn-outline-secondary btn-sm" 
+                                onclick="zoomToHall({{ hall.latitude }}, {{ hall.longitude }}, '{{ hall.name }}')">
+                            <i class="fas fa-crosshairs me-1"></i> View on Map
+                        </button>
+
+                        {% if hall.status == 'available' %}
+                        <a href="/book/{{ hall.id }}" class="btn btn-civic btn-sm">
+                            <i class="fas fa-calendar-check me-1"></i> Book Slot
+                        </a>
+                        {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>Maintenance</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let map;
+let hallMarkers = {};
+let userMarker = null;
+
+const hallsData = [
+    {% for h in halls %}
+    {
+        id: {{ h.id }},
+        name: "{{ h.name }}",
+        lat: {{ h.latitude }},
+        lng: {{ h.longitude }},
+        capacity: {{ h.capacity }},
+        tariff: {{ h.price_per_hour|int }},
+        location: "{{ h.location }}",
+        address: "{{ h.address or h.location }}",
+        status: "{{ h.status }}"
+    },
+    {% endfor %}
+];
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Initialize Leaflet Map centered around city center (Bangalore/Default Civic Center)
+    map = L.map('hallsMap').setView([12.9716, 77.5946], 12);
+
+    // OpenStreetMap Tile Layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors | City Municipal Corp'
+    }).addTo(map);
+
+    // Custom Hall Marker Icon
+    const hallIcon = L.divIcon({
+        className: 'custom-map-marker',
+        html: `<div style="background-color:#1e3a8a; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,0.3); font-size:14px;"><i class="fas fa-landmark"></i></div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -18]
+    });
+
+    // Add Markers for each hall
+    const bounds = [];
+    hallsData.forEach(h => {
+        const marker = L.marker([h.lat, h.lng], { icon: hallIcon }).addTo(map);
+        
+        const popupContent = `
+            <div style="font-family:'Inter',sans-serif; min-width:200px;">
+                <h6 style="font-weight:700; margin-bottom:4px; color:#1e3a8a;">${h.name}</h6>
+                <div style="font-size:12px; color:#475569; margin-bottom:6px;"><i class="fas fa-map-marker-alt text-danger me-1"></i>${h.address}</div>
+                <div style="font-size:12px; margin-bottom:8px;">
+                    <strong>${h.capacity} Seats</strong> &bull; <strong style="color:#2563eb;">₹${h.tariff}/hr</strong>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${h.lat},${h.lng}" target="_blank" class="btn btn-sm btn-primary" style="font-size:11px; padding:4px 8px; border-radius:4px; text-decoration:none;">
+                        <i class="fas fa-diamond-turn-right me-1"></i> Google Maps Directions
+                    </a>
+                    <a href="/book/${h.id}" class="btn btn-sm btn-success" style="font-size:11px; padding:4px 8px; border-radius:4px; text-decoration:none;">
+                        Book
+                    </a>
+                </div>
+            </div>
+        `;
+        marker.bindPopup(popupContent);
+        hallMarkers[h.id] = marker;
+        bounds.push([h.lat, h.lng]);
+    });
+
+    if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+    }
+});
+
+function zoomToHall(lat, lng, name) {
+    map.flyTo([lat, lng], 15, { duration: 1.2 });
+    // Scroll smoothly to map on mobile
+    document.getElementById('hallsMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Find matching marker and open popup
+    for (let id in hallMarkers) {
+        let m = hallMarkers[id];
+        let pos = m.getLatLng();
+        if (Math.abs(pos.lat - lat) < 0.0001 && Math.abs(pos.lng - lng) < 0.0001) {
+            m.openPopup();
+            break;
+        }
+    }
+}
+
+// Haversine formula to compute distance between coordinates in KM
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+// Geolocation: Find Nearest Halls
+function findNearestHalls() {
+    const alertBox = document.getElementById('locationAlert');
+    const alertText = document.getElementById('locationAlertText');
+    const locateBtn = document.getElementById('locateBtn');
+
+    alertBox.classList.remove('d-none');
+    alertBox.className = 'alert alert-info py-2 px-3 small d-flex align-items-center justify-content-between mb-3 shadow-sm';
+    alertText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Requesting GPS coordinates from your device...';
+    locateBtn.disabled = true;
+
+    if (!navigator.geolocation) {
+        alertBox.className = 'alert alert-warning py-2 px-3 small d-flex align-items-center justify-content-between mb-3';
+        alertText.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Geolocation is not supported by your browser.';
+        locateBtn.disabled = false;
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            locateBtn.disabled = false;
+
+            // Pin user location on map
+            if (userMarker) {
+                map.removeLayer(userMarker);
+            }
+            const userIcon = L.divIcon({
+                className: 'user-map-marker',
+                html: `<div style="background-color:#10b981; color:#fff; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:3px solid #fff; box-shadow:0 0 12px rgba(16,185,129,0.8); font-size:14px;"><i class="fas fa-user"></i></div>`,
+                iconSize: [36, 36],
+                iconAnchor: [18, 18]
+            });
+            userMarker = L.marker([userLat, userLng], { icon: userIcon }).addTo(map);
+            userMarker.bindPopup('<strong style="color:#059669;"><i class="fas fa-location-dot me-1"></i> You Are Here</strong>').openPopup();
+
+            // Calculate distance for all halls
+            const wrappers = Array.from(document.querySelectorAll('.hall-card-wrapper'));
+            let minDistance = 999999;
+            let nearestId = null;
+
+            wrappers.forEach(wrapper => {
+                const hLat = parseFloat(wrapper.dataset.lat);
+                const hLng = parseFloat(wrapper.dataset.lng);
+                const hid = wrapper.dataset.id;
+                const distanceKm = calculateDistance(userLat, userLng, hLat, hLng);
+                
+                wrapper.dataset.distance = distanceKm;
+                
+                const distanceTag = document.getElementById('distanceTag-' + hid);
+                if (distanceKm < minDistance) {
+                    minDistance = distanceKm;
+                    nearestId = hid;
+                }
+
+                if (distanceTag) {
+                    distanceTag.innerHTML = `<i class="fas fa-route me-1 text-warning"></i> <strong>${distanceKm.toFixed(1)} km</strong> away from you`;
+                }
+            });
+
+            // Highlight nearest hall
+            wrappers.forEach(wrapper => {
+                const hid = wrapper.dataset.id;
+                const distanceTag = document.getElementById('distanceTag-' + hid);
+                if (hid == nearestId && distanceTag) {
+                    distanceTag.innerHTML = `<span class="badge bg-success me-1"><i class="fas fa-star me-1"></i>NEAREST</span> <strong>${minDistance.toFixed(1)} km</strong> away`;
+                    wrapper.querySelector('.hall-item-card').style.border = '2px solid #059669';
+                }
+            });
+
+            // Sort cards in DOM from closest to farthest
+            const container = document.getElementById('hallsContainer');
+            wrappers.sort((a, b) => parseFloat(a.dataset.distance) - parseFloat(b.dataset.distance));
+            wrappers.forEach(w => container.appendChild(w));
+
+            // Fit map to show both user and nearest hall
+            const bounds = [[userLat, userLng]];
+            hallsData.forEach(h => bounds.push([h.lat, h.lng]));
+            map.fitBounds(bounds, { padding: [50, 50] });
+
+            alertBox.className = 'alert alert-success py-2 px-3 small d-flex align-items-center justify-content-between mb-3 shadow-sm';
+            alertText.innerHTML = `<i class="fas fa-check-circle me-2"></i> <strong>GPS Found!</strong> Sorted halls by distance from your current location. The closest facility is <strong>${minDistance.toFixed(1)} km</strong> away.`;
+        },
+        function(error) {
+            locateBtn.disabled = false;
+            let errText = "Unable to retrieve location.";
+            if (error.code === error.PERMISSION_DENIED) {
+                errText = "Location access was denied. Please allow location permissions in your browser.";
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                errText = "Location information is unavailable on your device.";
+            } else if (error.code === error.TIMEOUT) {
+                errText = "The location request timed out.";
+            }
+            alertBox.className = 'alert alert-warning py-2 px-3 small d-flex align-items-center justify-content-between mb-3 shadow-sm';
+            alertText.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i> ${errText}`;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+}
+</script>
+{% endblock %}

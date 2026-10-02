@@ -1,0 +1,447 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Community Hall Booking{% endblock %} - Municipal Civic Portal</title>
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        :root {
+            --civic-navy: #1e3a8a;
+            --civic-blue: #2563eb;
+            --civic-dark: #0f172a;
+            --civic-bg: #f8fafc;
+            --civic-card-bg: #ffffff;
+            --civic-border: #e2e8f0;
+            --civic-text: #1e293b;
+            --civic-muted: #64748b;
+            --civic-accent: #0284c7;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--civic-bg);
+            color: var(--civic-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Government / Municipal Header */
+        .gov-topbar {
+            background: #0f172a;
+            color: #94a3b8;
+            font-size: 0.78rem;
+            padding: 5px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        /* Main Navbar */
+        .civic-navbar {
+            background: #1e3a8a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff !important;
+            text-decoration: none;
+        }
+        .brand-emblem {
+            width: 42px;
+            height: 42px;
+            background: #ffffff;
+            color: #1e3a8a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        .brand-title {
+            font-weight: 800;
+            font-size: 1.15rem;
+            line-height: 1.2;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+        .brand-subtitle {
+            font-size: 0.72rem;
+            color: #bfdbfe;
+            font-weight: 500;
+        }
+
+        .nav-link-custom {
+            color: #e2e8f0 !important;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 8px 14px !important;
+            border-radius: 6px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            background-color: rgba(255,255,255,0.15);
+            color: #ffffff !important;
+        }
+
+        /* Content Container */
+        .content-wrapper {
+            flex: 1;
+            padding: 28px 0;
+        }
+
+        /* Authentic Cards */
+        .civic-card {
+            background: var(--civic-card-bg);
+            border: 1px solid var(--civic-border);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: box-shadow 0.2s;
+        }
+        .civic-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Metric KPI Cards */
+        .metric-box {
+            background: #ffffff;
+            border: 1px solid var(--civic-border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--civic-blue);
+        }
+        .metric-box.green { border-left-color: #10b981; }
+        .metric-box.amber { border-left-color: #f59e0b; }
+        .metric-box.purple { border-left-color: #8b5cf6; }
+        .metric-number { font-size: 1.85rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+        .metric-title { font-size: 0.78rem; font-weight: 600; color: var(--civic-muted); text-transform: uppercase; margin-top: 4px; }
+
+        /* Hall Cards */
+        .hall-item-card {
+            background: #ffffff;
+            border: 1px solid var(--civic-border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .hall-item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+        .hall-thumb {
+            height: 190px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .hall-thumb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+        }
+        .hall-thumb-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 2;
+        }
+        .hall-thumb-distance {
+            position: absolute;
+            bottom: 10px;
+            left: 12px;
+            z-index: 2;
+            color: #ffffff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(15,23,42,0.75);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* Buttons */
+        .btn-civic {
+            background-color: var(--civic-navy);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.88rem;
+            border-radius: 6px;
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-civic:hover {
+            background-color: #172554;
+            color: #ffffff;
+        }
+        .btn-civic-green {
+            background-color: #059669;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.88rem;
+            border-radius: 6px;
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn-civic-green:hover { background-color: #047857; color: #ffffff; }
+
+        /* Form elements */
+        .form-control-civic {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            color: #0f172a;
+            background-color: #ffffff;
+        }
+        .form-control-civic:focus {
+            border-color: var(--civic-blue);
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+        .form-label-civic {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* Tables */
+        .table-civic {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-civic th {
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .table-civic td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.88rem;
+            vertical-align: middle;
+        }
+        .table-civic tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* Map Container */
+        #hallsMap {
+            height: 380px;
+            border-radius: 10px;
+            border: 1px solid var(--civic-border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            z-index: 10;
+        }
+
+        /* Footer */
+        .civic-footer {
+            background: #0f172a;
+            color: #94a3b8;
+            font-size: 0.82rem;
+            padding: 24px 0 16px;
+            border-top: 3px solid #1e3a8a;
+            margin-top: auto;
+        }
+        .civic-footer a {
+            color: #cbd5e1;
+            text-decoration: none;
+        }
+        .civic-footer a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .gov-topbar { flex-direction: column; gap: 4px; text-align: center; }
+            .brand-title { font-size: 1rem; }
+            .metric-number { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Government / Municipal Top Header -->
+<div class="gov-topbar">
+    <div>
+        <span><i class="fas fa-landmark me-1"></i> City Municipal Corporation &bull; Civic Amenities & Community Welfare Dept</span>
+    </div>
+    <div>
+        <span><i class="fas fa-phone-alt me-1"></i> Helpline: 1800-425-2244</span>
+        <span class="mx-2">|</span>
+        <span class="badge bg-success text-white">VTU Project #78 &bull; PO 6 &bull; SDG 11</span>
+    </div>
+</div>
+
+<!-- Main Civic Navbar -->
+<nav class="navbar navbar-expand-lg civic-navbar">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <div class="brand-emblem">
+                <i class="fas fa-building-columns"></i>
+            </div>
+            <div>
+                <div class="brand-title">Community Hall Booking Portal</div>
+                <div class="brand-subtitle">Municipal Asset & Civic Space Reservation System</div>
+            </div>
+        </a>
+        <button class="navbar-toggler border-white text-white" type="button" data-bs-toggle="collapse" data-bs-target="#civicNav">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="civicNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
+                <li class="nav-item">
+                    <a class="nav-link-custom {% if request.endpoint == 'dashboard' %}active{% endif %}" href="/dashboard">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {% if request.endpoint == 'view_halls' %}active{% endif %}" href="/halls">
+                        <i class="fas fa-building"></i> Browse Halls
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {% if request.endpoint == 'availability' %}active{% endif %}" href="/availability">
+                        <i class="fas fa-calendar-check"></i> Availability
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link-custom {% if request.endpoint == 'my_bookings' %}active{% endif %}" href="/my-bookings">
+                        <i class="fas fa-receipt"></i> My Bookings
+                    </a>
+                </li>
+                {% if session.get('is_admin') %}
+                <li class="nav-item">
+                    <a class="nav-link-custom text-warning {% if request.endpoint == 'admin_panel' %}active{% endif %}" href="/admin">
+                        <i class="fas fa-shield-alt text-warning"></i> Admin Office
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item dropdown ms-lg-2">
+                    <a class="btn btn-sm btn-light text-dark fw-bold dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle text-primary fs-5"></i>
+                        <span>{{ session.get('username', 'Account') }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><h6 class="dropdown-header">Signed in as <strong>{{ session.get('username') }}</strong></h6></li>
+                        <li><a class="dropdown-item" href="/profile"><i class="fas fa-id-badge text-muted me-2"></i>My Profile</a></li>
+                        <li><a class="dropdown-item" href="/my-bookings"><i class="fas fa-ticket-alt text-muted me-2"></i>My Reservations</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/logout"><i class="fas fa-sign-out-alt me-2"></i>Sign Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Page Content -->
+<div class="content-wrapper">
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for cat, msg in messages %}
+                <div class="alert alert-{{ cat if cat != 'danger' else 'danger' }} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-{% if cat == 'danger' %}exclamation-circle{% else %}check-circle{% endif %} me-2"></i>
+                    {{ msg }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<!-- Official Municipal Civic Footer -->
+<footer class="civic-footer">
+    <div class="container">
+        <div class="row g-4 mb-3">
+            <div class="col-12 col-md-5">
+                <div class="d-flex align-items-center gap-2 mb-2 text-white fw-bold">
+                    <i class="fas fa-building-columns text-info fs-5"></i>
+                    <span>Community Hall Booking & Management System</span>
+                </div>
+                <p class="small text-secondary mb-2">
+                    A digital initiative for transparent public hall reservations, conflict-free scheduling, preventive maintenance tracking, and equitable civic access.
+                </p>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-primary">PO 6: Engineer & Society</span>
+                    <span class="badge bg-success">SDG 11: Sustainable Cities</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <h6 class="text-white fw-bold small text-uppercase mb-2">Quick Navigation</h6>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-1"><a href="/halls"><i class="fas fa-angle-right me-1 text-primary"></i>Browse All Halls</a></li>
+                    <li class="mb-1"><a href="/availability"><i class="fas fa-angle-right me-1 text-primary"></i>Live Slot Calendar</a></li>
+                    <li class="mb-1"><a href="/my-bookings"><i class="fas fa-angle-right me-1 text-primary"></i>Check Booking Status</a></li>
+                    {% if session.get('is_admin') %}
+                    <li><a href="/admin"><i class="fas fa-angle-right me-1 text-warning"></i>Admin Review Panel</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-6 col-md-4">
+                <h6 class="text-white fw-bold small text-uppercase mb-2">Municipal Helpdesk</h6>
+                <p class="small text-secondary mb-1"><i class="fas fa-map-marker-alt text-danger me-2"></i>Civic Centre, Corporation Main Building, District Office</p>
+                <p class="small text-secondary mb-1"><i class="fas fa-envelope text-info me-2"></i>support@communityhall.gov.in</p>
+                <p class="small text-secondary mb-0"><i class="fas fa-clock text-warning me-2"></i>Mon - Sat: 9:00 AM - 5:30 PM</p>
+            </div>
+        </div>
+        <hr class="border-secondary opacity-25 my-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center small text-secondary">
+            <div>&copy; 2026 City Municipal Corporation. All Rights Reserved.</div>
+            <div>Powered by Python Flask &bull; SQLite/MySQL &bull; Leaflet &bull; Google Maps API</div>
+        </div>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Leaflet JS for Maps -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

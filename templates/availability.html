@@ -1,0 +1,77 @@
+﻿{% extends "base.html" %}
+{% block title %}Hall Availability Schedule - Municipal Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="fas fa-calendar-alt text-primary me-2"></i>Live Hall Availability Calendar</h3>
+        <p class="text-muted small mb-0">Check confirmed bookings and maintenance windows to reserve collision-free slots</p>
+    </div>
+    <div class="mt-2 mt-md-0">
+        <form method="GET" action="/availability" class="d-flex align-items-center gap-2">
+            <select name="hall_id" class="form-select form-control-civic" onchange="this.form.submit()">
+                <option value="">All Municipal Halls</option>
+                {% for h in halls %}
+                <option value="{{ h.id }}" {% if selected_hall == h.id %}selected{% endif %}>
+                    {{ h.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<div class="civic-card p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table-civic">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time Window</th>
+                    <th>Facility</th>
+                    <th>Purpose / Event</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if bookings %}
+                    {% for b in bookings %}
+                    <tr>
+                        <td class="fw-bold text-dark">
+                            <i class="fas fa-calendar-day text-primary me-1"></i> {{ b.booking_date }}
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border fw-semibold">
+                                {{ b.start_time }} - {{ b.end_time }}
+                            </span>
+                        </td>
+                        <td class="fw-semibold text-dark">{{ b.hall_name }}</td>
+                        <td class="small text-muted">{{ b.purpose }}</td>
+                        <td>
+                            <span class="badge {% if b.status == 'approved' %}bg-success{% else %}bg-warning text-dark{% endif %} text-uppercase">
+                                {{ b.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/book/{{ b.hall_id }}" class="btn btn-sm btn-outline-primary" style="font-size:0.75rem;">
+                                Book Other Slot
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fas fa-calendar-check fa-3x text-success opacity-75 d-block mb-2"></i>
+                            <h5 class="text-dark">All Slots Open!</h5>
+                            <p class="small text-muted">No reservations booked for the selected criteria. You can reserve any slot.</p>
+                            <a href="/halls" class="btn btn-civic btn-sm">Reserve a Hall</a>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

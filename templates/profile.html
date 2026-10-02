@@ -1,0 +1,47 @@
+﻿{% extends "base.html" %}
+{% block title %}Citizen Profile - Municipal Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="civic-card">
+            <div class="text-center mb-4 pb-3 border-bottom">
+                <div class="d-inline-flex p-3 rounded-circle bg-light text-primary fs-3 mb-2">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-1">{{ user.username }}</h4>
+                <div class="badge {% if user.is_admin %}bg-danger{% else %}bg-primary{% endif %} mb-2">
+                    {% if user.is_admin %}Municipal Officer (Administrator){% else %}Registered Citizen Member{% endif %}
+                </div>
+                <div class="text-muted small">Citizen Account ID: #00{{ user.id }}</div>
+            </div>
+
+            {% if msg %}
+            <div class="alert alert-success py-2 px-3 small mb-3">{{ msg }}</div>
+            {% endif %}
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label-civic">Username</label>
+                    <input type="text" class="form-control form-control-civic bg-light" value="{{ user.username }}" disabled>
+                    <div class="form-text small" style="font-size:0.75rem;">Username is permanent and registered with the municipality.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label-civic">Registered Email Address</label>
+                    <input type="email" name="email" class="form-control form-control-civic" value="{{ user.email }}" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label-civic">Contact Mobile Phone</label>
+                    <input type="tel" name="phone" class="form-control form-control-civic" value="{{ user.phone or '' }}" placeholder="10-digit mobile number">
+                </div>
+
+                <button type="submit" class="btn btn-civic w-100 justify-content-center py-2">
+                    <i class="fas fa-save me-1"></i> Update Profile Information
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
