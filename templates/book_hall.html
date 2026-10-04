@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Book {{ hall.name }} - Municipal Community Halls{% endblock %}
 
 {% block content %}
@@ -72,9 +72,15 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-civic w-100 justify-content-center py-2 fs-6">
-                    <i class="fas fa-check-circle me-1"></i> Submit Hall Booking Request
+                <button type="submit" id="submitBtn" class="btn btn-civic w-100 justify-content-center py-2 fs-6">
+                    <span id="btnText"><i class="fas fa-check-circle me-1"></i> Submit Hall Booking Request</span>
+                    <span id="btnLoader" style="display:none;">
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span> Submitting... Please wait
+                    </span>
                 </button>
+                <p class="text-muted text-center mt-2 small" id="submitHint" style="display:none;">
+                    <i class="fas fa-info-circle me-1"></i> Server is processing your request, this may take 10–20 seconds...
+                </p>
             </form>
         </div>
     </div>
@@ -163,6 +169,20 @@ document.addEventListener("DOMContentLoaded", function() {
     startTimeInput.addEventListener("change", updateCalculations);
     endTimeInput.addEventListener("change", updateCalculations);
     updateCalculations();
+
+    // Form submit: show loading spinner, prevent double-submit
+    const bookingForm = document.getElementById("bookingForm");
+    const submitBtn = document.getElementById("submitBtn");
+    const btnText = document.getElementById("btnText");
+    const btnLoader = document.getElementById("btnLoader");
+    const submitHint = document.getElementById("submitHint");
+
+    bookingForm.addEventListener("submit", function() {
+        btnText.style.display = "none";
+        btnLoader.style.display = "inline-flex";
+        submitHint.style.display = "block";
+        submitBtn.disabled = true;
+    });
 });
 </script>
 {% endblock %}
