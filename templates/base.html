@@ -309,8 +309,6 @@
     </div>
     <div>
         <span><i class="fas fa-phone-alt me-1"></i> Helpline: 1800-425-2244</span>
-        <span class="mx-2">|</span>
-        <span class="badge bg-success text-white">VTU Project #78 &bull; PO 6 &bull; SDG 11</span>
     </div>
 </div>
 
@@ -331,33 +329,42 @@
         </button>
         <div class="collapse navbar-collapse" id="civicNav">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
-                <li class="nav-item">
-                    <a class="nav-link-custom {% if request.endpoint == 'dashboard' %}active{% endif %}" href="/dashboard">
-                        <i class="fas fa-home"></i> Home
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link-custom {% if request.endpoint == 'view_halls' %}active{% endif %}" href="/halls">
-                        <i class="fas fa-building"></i> Browse Halls
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link-custom {% if request.endpoint == 'availability' %}active{% endif %}" href="/availability">
-                        <i class="fas fa-calendar-check"></i> Availability
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link-custom {% if request.endpoint == 'my_bookings' %}active{% endif %}" href="/my-bookings">
-                        <i class="fas fa-receipt"></i> My Bookings
-                    </a>
-                </li>
                 {% if session.get('is_admin') %}
-                <li class="nav-item">
-                    <a class="nav-link-custom text-warning {% if request.endpoint == 'admin_panel' %}active{% endif %}" href="/admin">
-                        <i class="fas fa-shield-alt text-warning"></i> Admin Office
-                    </a>
-                </li>
+                    <!-- ADMIN NAVIGATION -->
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.endpoint == 'admin_panel' %}active{% endif %}" href="/admin">
+                            <i class="fas fa-shield-alt text-warning"></i> Admin Office
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.endpoint == 'availability' %}active{% endif %}" href="/availability">
+                            <i class="fas fa-calendar-check"></i> Master Schedule
+                        </a>
+                    </li>
+                {% else %}
+                    <!-- CITIZEN NAVIGATION -->
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.endpoint == 'dashboard' %}active{% endif %}" href="/dashboard">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.endpoint == 'view_halls' %}active{% endif %}" href="/halls">
+                            <i class="fas fa-building"></i> Browse Halls
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.endpoint == 'availability' %}active{% endif %}" href="/availability">
+                            <i class="fas fa-calendar-check"></i> Availability
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.endpoint == 'my_bookings' %}active{% endif %}" href="/my-bookings">
+                            <i class="fas fa-receipt"></i> My Bookings
+                        </a>
+                    </li>
                 {% endif %}
+
                 <li class="nav-item dropdown ms-lg-2">
                     <a class="btn btn-sm btn-light text-dark fw-bold dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fas fa-user-circle text-primary fs-5"></i>

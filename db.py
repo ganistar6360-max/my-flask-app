@@ -28,7 +28,7 @@ def init_db():
     # Migration: Ensure latitude, longitude, address, image_url exist
     cursor.execute("PRAGMA table_info(halls)")
     cols = [row[1] for row in cursor.fetchall()]
-    
+
     if "latitude" not in cols:
         cursor.execute("ALTER TABLE halls ADD COLUMN latitude REAL DEFAULT 12.9716")
     if "longitude" not in cols:
@@ -37,29 +37,37 @@ def init_db():
         cursor.execute("ALTER TABLE halls ADD COLUMN address TEXT DEFAULT ''")
     if "image_url" not in cols:
         cursor.execute("ALTER TABLE halls ADD COLUMN image_url TEXT DEFAULT ''")
-    
+
+    # Migration: Ensure payment columns exist in bookings
+    cursor.execute("PRAGMA table_info(bookings)")
+    b_cols = [row[1] for row in cursor.fetchall()]
+    if "payment_status" not in b_cols:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN payment_status VARCHAR(20) DEFAULT 'unpaid'")
+    if "transaction_id" not in b_cols:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN transaction_id VARCHAR(50) DEFAULT NULL")
+
     # Update real coordinates, addresses, and authentic photos
     hall_updates = [
         (
-            12.9716, 77.5946, 
+            12.9716, 77.5946,
             "Town Hall Circle, J.C. Road, Central Civic Ward No. 4",
             "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=800&q=80",
             1
         ),
         (
-            12.9299, 77.5824, 
+            12.9299, 77.5824,
             "11th Main Road, 4th T Block, Jayanagar Civic Complex",
             "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?auto=format&fit=crop&w=800&q=80",
             2
         ),
         (
-            12.9912, 77.5872, 
+            12.9912, 77.5872,
             "Palace Cross Road, Near High Court Annexe, Vasanth Nagar",
             "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80",
             3
         ),
         (
-            13.0031, 77.5644, 
+            13.0031, 77.5644,
             "8th Main, 15th Cross, Near Public Library, Malleshwaram",
             "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80",
             4
@@ -70,6 +78,14 @@ def init_db():
             "UPDATE halls SET latitude = ?, longitude = ?, address = ?, image_url = ? WHERE id = ?",
             (lat, lng, addr, img, hid)
         )
+
+    # Migration: Add payment columns to bookings table
+    cursor.execute("PRAGMA table_info(bookings)")
+    booking_cols = [row[1] for row in cursor.fetchall()]
+    if "payment_status" not in booking_cols:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN payment_status VARCHAR(20) DEFAULT 'unpaid'")
+    if "transaction_id" not in booking_cols:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN transaction_id VARCHAR(50)")
 
     conn.commit()
     conn.close()
@@ -266,6 +282,17 @@ def complete_maintenance(mid, hall_id):
     conn.execute("UPDATE halls SET status = 'available' WHERE id = ?", (hall_id,))
     conn.commit()
     conn.close()
+
+# ----------------- PAYMENT CRUD -----------------
+def update_booking_payment(booking_id, payment_status, transaction_id):
+    conn = get_connection()
+    conn.execute(
+        "UPDATE bookings SET payment_status = ?, transaction_id = ? WHERE id = ?",
+        (payment_status, transaction_id, booking_id)
+    )
+    conn.commit()
+    conn.close()
+
 
 # ----------------- ANALYTICS & DASHBOARD METRICS -----------------
 def get_dashboard_metrics():

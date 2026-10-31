@@ -1,20 +1,20 @@
 ﻿# 🏛️ Community Hall Booking & Management System
 
-> **VTU Community Engineering Project #78**  
-> **Specialization:** Track A — Web (Python + Flask + MySQL / SQLite + HTML/CSS/JS + Bootstrap 5 + Chart.js)  
-> **Program Outcome:** PO 6 (The Engineer and Society)  
-> **Sustainable Development Goal:** SDG 11 (Sustainable Cities and Communities - Target 11.7)  
+> **Municipal Infrastructure & Asset Management Portal**  
+> **Specialization:** Web (Python + Flask + SQLite + HTML/CSS/JS + Bootstrap 5 + Chart.js)
 
 ---
 
 ## 🌟 Measurable Engineering Outcomes Accomplished
 
 1. **Manage Community Hall Bookings:** Complete self-service portal to browse auditoriums, check seating limits, select date/time windows, auto-calculate tariffs, and generate booking passes.
-2. **Track Hall Availability:** Real-time visual availability schedule with automated slot-overlap prevention (`409 Conflict` validation).
-3. **Process Booking Requests:** Municipal Admin dashboard with single-click **Approval** and **Rejection** (with citizen feedback note & notification).
-4. **Schedule Maintenance:** Facility downtime scheduler that marks halls under maintenance, blocks overlapping citizen reservations, and records maintenance history.
-5. **Maintain Booking Records:** Searchable audit trail of all transactions with downloadable and printable digital booking receipts.
-6. **Mobile Responsive Architecture:** Accessible on desktop browsers as well as smartphones over local Wi-Fi.
+2. **Integrated Demo Payment Gateway:** Secure mock payment flow supporting Card, UPI, and Net Banking with instant transaction receipt generation.
+3. **Dedicated Admin & User Portals:** Specialized interfaces for citizens (browsing/booking) and municipal officers (approvals/maintenance/management).
+4. **Track Hall Availability:** Real-time visual availability schedule with automated slot-overlap prevention (`409 Conflict` validation).
+5. **Process Booking Requests:** Municipal Admin dashboard with single-click **Approval** and **Rejection** (with citizen feedback note & notification).
+6. **Schedule Maintenance:** Facility downtime scheduler that marks halls under maintenance, blocks overlapping citizen reservations, and records maintenance history.
+7. **Maintain Booking Records:** Searchable audit trail of all transactions with downloadable and printable digital booking receipts and paid invoices.
+8. **Mobile Responsive Architecture:** Accessible on desktop browsers as well as smartphones over local Wi-Fi.
 
 ---
 
@@ -31,7 +31,7 @@ my-flask-app/
 │   ├── schema_mysql.sql        # MySQL 8.0 Script for MySQL Workbench
 │   └── community_hall.db       # Active SQLite Database (instant offline execution)
 ├── documentation/
-│   └── PROJECT_REPORT.md       # Comprehensive Project Report, PO6/SDG11 & UML Diagrams
+│   └── PROJECT_REPORT.md       # Comprehensive Project Report & UML Diagrams
 ├── test/
 │   └── test_api.py             # Automated Unit & REST API Integration Tests
 ├── screenshots/                # Visual UI captures
@@ -46,7 +46,7 @@ my-flask-app/
     ├── halls.html              # Searchable Community Hall Catalog & Filters
     ├── hall_detail.html        # Hall Specifications, Amenities & Tariff
     ├── book_hall.html          # Live Tariff Estimator & Reservation Form
-    ├── my_bookings.html        # Booking Pass & Receipt Generation
+    ├── my_bookings.html        # Booking Pass, Payment Gateway & Receipt Generation
     ├── availability.html       # Real-Time Schedule Calendar
     ├── admin.html              # Municipal Officer Control Panel & Maintenance Scheduler
     └── profile.html            # Citizen Profile Editor

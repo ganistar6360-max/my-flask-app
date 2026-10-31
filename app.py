@@ -164,6 +164,9 @@ def reset_password(token):
 @app.route("/dashboard")
 @login_required
 def dashboard():
+    if session.get("is_admin"):
+        return redirect(url_for("admin_panel"))
+
     halls_list = db.get_all_halls()
     my_bookings = db.get_bookings_by_user(session["user_id"])
     metrics = db.get_dashboard_metrics()
@@ -303,6 +306,35 @@ def cancel_booking(booking_id):
             flash("Booking cancelled successfully.", "info")
         else:
             flash("Cannot cancel a booking that is already completed or rejected.", "warning")
+    return redirect(url_for("my_bookings"))
+
+# ----------------- DEMO PAYMENT GATEWAY -----------------
+import random
+import string
+
+@app.route("/pay-booking/<int:booking_id>", methods=["POST"])
+@login_required
+def pay_booking(booking_id):
+    booking = db.get_booking_by_id(booking_id)
+    if not booking or booking["user_id"] != session["user_id"]:
+        flash("Booking not found.", "danger")
+        return redirect(url_for("my_bookings"))
+
+    if booking["payment_status"] == "paid":
+        flash("This booking is already paid.", "info")
+        return redirect(url_for("my_bookings"))
+
+    # Simulate a payment gateway transaction
+    tx_id = "TXN" + "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    db.update_booking_payment(booking_id, "paid", tx_id)
+
+    send_notification_email(
+        session["email"],
+        f"Payment Confirmed - {booking['booking_ref']}",
+        f"Dear {session['username']},\n\nYour payment for booking {booking['booking_ref']} has been processed successfully!\nTransaction ID: {tx_id}\nAmount Paid: Rs. {booking['total_cost']}\n\nYour booking is now confirmed. Please present this receipt at the venue.\n\nThank you for using Community Hall Services."
+    )
+
+    flash(f"Payment successful! Transaction ID: {tx_id}", "success")
     return redirect(url_for("my_bookings"))
 
 # ----------------- AVAILABILITY CALENDAR -----------------

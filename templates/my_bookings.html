@@ -55,6 +55,11 @@
                         </td>
                         <td>
                             <span class="fw-bold text-dark">₹{{ b.total_cost|int }}</span>
+                            {% if b.payment_status == 'paid' %}
+                            <div><span class="badge bg-success" style="font-size:0.65rem;"><i class="fas fa-check me-1"></i>Paid</span></div>
+                            {% else %}
+                            <div><span class="badge bg-warning text-dark" style="font-size:0.65rem;">Unpaid</span></div>
+                            {% endif %}
                         </td>
                         <td>
                             <span class="badge {% if b.status == 'approved' %}bg-success{% elif b.status == 'pending' %}bg-warning text-dark{% elif b.status == 'cancelled' %}bg-secondary{% else %}bg-danger{% endif %} text-uppercase">
@@ -67,10 +72,17 @@
                             {% endif %}
                         </td>
                         <td>
-                            <div class="d-flex gap-1">
+                            <div class="d-flex gap-1 flex-wrap">
                                 <button type="button" class="btn btn-sm btn-outline-primary" onclick="viewReceipt({{ b|tojson }})" style="font-size:0.78rem;">
                                     <i class="fas fa-id-card me-1"></i> Pass
                                 </button>
+
+                                {% if b.payment_status != 'paid' and b.status not in ['cancelled', 'rejected'] %}
+                                <button type="button" class="btn btn-sm btn-success fw-bold" onclick="openPaymentModal({{ b.id }}, {{ b.total_cost }}, '{{ b.booking_ref }}')" style="font-size:0.78rem;">
+                                    <i class="fas fa-credit-card me-1"></i> Pay Now
+                                </button>
+                                {% endif %}
+
                                 {% if b.status in ['pending', 'approved'] %}
                                 <form method="POST" action="/cancel-booking/{{ b.id }}" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
                                     <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size:0.78rem;">
@@ -114,6 +126,116 @@
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary btn-sm" onclick="window.print()">
                     <i class="fas fa-print me-1"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Demo Payment Gateway Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" style="font-size:1.05rem;">
+                    <i class="fas fa-shield-alt me-2"></i>Municipal Civic Payment Gateway
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 bg-light rounded text-center border mb-3">
+                    <div class="small text-muted text-uppercase">Payment for Booking Reference</div>
+                    <div class="badge bg-secondary font-monospace mt-1" id="payRefLabel">BK-XXXXXXXX</div>
+                    <div class="small text-muted mt-2">Total Amount Payable:</div>
+                    <div class="fs-2 fw-bold text-success">₹<span id="payAmountLabel">0</span></div>
+                    <span class="badge bg-info text-dark mt-1"><i class="fas fa-info-circle me-1"></i>Demo Sandbox Mode</span>
+                </div>
+
+                <ul class="nav nav-pills nav-fill mb-3" id="paymentTab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active small py-2 fw-bold" id="card-tab" data-bs-toggle="pill" data-bs-target="#pills-card" type="button">
+                            <i class="fas fa-credit-card me-1"></i> Card
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link small py-2 fw-bold" id="upi-tab" data-bs-toggle="pill" data-bs-target="#pills-upi" type="button">
+                            <i class="fas fa-qrcode me-1"></i> UPI / QR
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link small py-2 fw-bold" id="net-tab" data-bs-toggle="pill" data-bs-target="#pills-net" type="button">
+                            <i class="fas fa-university me-1"></i> Net Banking
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="paymentTabContent">
+                    <!-- Card Tab -->
+                    <div class="tab-pane fade show active" id="pills-card">
+                        <div class="mb-3">
+                            <label class="form-label-civic">Card Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                <input type="text" class="form-control form-control-civic" placeholder="4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 8892" value="4532 8901 2345 6789">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label-civic">Expiry (MM/YY)</label>
+                                <input type="text" class="form-control form-control-civic" placeholder="12/28" value="08/29">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label-civic">CVV</label>
+                                <input type="password" class="form-control form-control-civic" placeholder="123" value="789" maxlength="3">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label-civic">Cardholder Name</label>
+                            <input type="text" class="form-control form-control-civic" value="{{ session.username or 'Citizen User' }}">
+                        </div>
+                    </div>
+
+                    <!-- UPI Tab -->
+                    <div class="tab-pane fade text-center" id="pills-upi">
+                        <div class="p-3 border rounded bg-white mb-3 d-inline-block">
+                            <i class="fas fa-qrcode fa-5x text-dark"></i>
+                            <div class="small text-muted mt-2">Scan with GPay / PhonePe / Paytm</div>
+                        </div>
+                        <div class="mb-2 text-start">
+                            <label class="form-label-civic">Or Enter UPI ID / VPA</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-civic" placeholder="username@oksbi" value="{{ session.username or 'citizen' }}@upi">
+                                <span class="input-group-text bg-success text-white small">Verified</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Net Banking Tab -->
+                    <div class="tab-pane fade" id="pills-net">
+                        <div class="mb-3">
+                            <label class="form-label-civic">Select Your Bank</label>
+                            <select class="form-select form-control-civic">
+                                <option>State Bank of India (SBI)</option>
+                                <option>HDFC Bank</option>
+                                <option>ICICI Bank</option>
+                                <option>Canara Bank</option>
+                                <option>Axis Bank</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-light border small text-muted">
+                            <i class="fas fa-lock text-success me-1"></i> You will be securely redirected to your bank's portal simulation.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary py-2 px-3 small mt-3 mb-0" style="font-size:0.75rem;">
+                    <i class="fas fa-shield-alt text-success me-1"></i> 256-bit SSL Municipal Gateway Encryption &bull; Instant Receipt Generation
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmPayBtn" class="btn btn-sm btn-success fw-bold px-3" onclick="processPayment()">
+                    <i class="fas fa-lock me-1"></i> Confirm & Authorize Payment
                 </button>
             </div>
         </div>
@@ -169,6 +291,12 @@ function viewReceipt(booking) {
                     <td class="text-muted">Verification Status:</td>
                     <td class="text-end fw-bold text-uppercase ${booking.status === 'approved' ? 'text-success' : 'text-warning'}">${booking.status}</td>
                 </tr>
+                <tr>
+                    <td class="text-muted">Payment Status:</td>
+                    <td class="text-end fw-bold ${booking.payment_status === 'paid' ? 'text-success' : 'text-warning'}">
+                        ${booking.payment_status === 'paid' ? '<i class="fas fa-check-circle me-1"></i>PAID (' + (booking.transaction_id || 'ONLINE') + ')' : '<i class="fas fa-clock me-1"></i>PENDING'}
+                    </td>
+                </tr>
             </tbody>
         </table>
 
@@ -186,6 +314,33 @@ function viewReceipt(booking) {
     `;
     const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
     modal.show();
+}
+
+let activeBookingId = null;
+
+function openPaymentModal(bookingId, amount, ref) {
+    activeBookingId = bookingId;
+    document.getElementById("payRefLabel").textContent = ref;
+    document.getElementById("payAmountLabel").textContent = Number(amount).toLocaleString();
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    modal.show();
+}
+
+function processPayment() {
+    if (!activeBookingId) return;
+
+    const btn = document.getElementById("confirmPayBtn");
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Processing Gateway...';
+    btn.disabled = true;
+
+    // Simulate gateway roundtrip
+    setTimeout(function() {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/pay-booking/" + activeBookingId;
+        document.body.appendChild(form);
+        form.submit();
+    }, 1200);
 }
 </script>
 {% endblock %}
