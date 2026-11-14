@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mb-3">
     <a href="/halls" class="text-primary text-decoration-none small fw-semibold">
-        <i class="fas fa-arrow-left me-1"></i> Back to Halls Directory & Map
+        <i class="fas fa-arrow-left me-1"></i> Back to Halls Directory &amp; Map
     </a>
 </div>
 
@@ -26,37 +26,55 @@
             </div>
             {% endif %}
 
-            <form method="POST" id="bookingForm">
+            {# FIX 1 & 2: Explicit action URL + CSRF hidden token #}
+            <form method="POST" action="{{ url_for('book_hall', hall_id=hall.id) }}" id="bookingForm" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6">
                         <label class="form-label-civic">Event Date <span class="text-danger">*</span></label>
-                        <input type="date" name="booking_date" id="booking_date" class="form-control form-control-civic" min="{{ today }}" value="{{ today }}" required>
+                        <input type="date" name="booking_date" id="booking_date"
+                               class="form-control form-control-civic"
+                               min="{{ today }}" value="{{ today }}" required>
                     </div>
                     <div class="col-6 col-md-3">
                         <label class="form-label-civic">Start Time <span class="text-danger">*</span></label>
-                        <input type="time" name="start_time" id="start_time" class="form-control form-control-civic" value="09:00" required>
+                        <input type="time" name="start_time" id="start_time"
+                               class="form-control form-control-civic" value="09:00" required>
                     </div>
                     <div class="col-6 col-md-3">
                         <label class="form-label-civic">End Time <span class="text-danger">*</span></label>
-                        <input type="time" name="end_time" id="end_time" class="form-control form-control-civic" value="13:00" required>
+                        <input type="time" name="end_time" id="end_time"
+                               class="form-control form-control-civic" value="13:00" required>
                     </div>
+                </div>
+
+                {# FIX 4: Inline time validation warning #}
+                <div id="timeError" class="alert alert-warning py-2 px-3 small mb-3" style="display:none;">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    End time must be <strong>after</strong> start time. Please correct before submitting.
                 </div>
 
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-8">
                         <label class="form-label-civic">Event Purpose / Title <span class="text-danger">*</span></label>
-                        <input type="text" name="purpose" class="form-control form-control-civic" placeholder="e.g. Annual Youth Skill Workshop, Cultural Fest, Society Meeting" required>
+                        <input type="text" name="purpose" class="form-control form-control-civic"
+                               placeholder="e.g. Annual Youth Skill Workshop, Cultural Fest, Society Meeting" required>
                     </div>
                     <div class="col-12 col-md-4">
                         <label class="form-label-civic">Expected Attendees <span class="text-danger">*</span></label>
-                        <input type="number" name="attendees" class="form-control form-control-civic" min="1" max="{{ hall.capacity }}" value="50" required>
+                        {# FIX 3: Default value capped to hall capacity so it never pre-fills an invalid number #}
+                        <input type="number" name="attendees" class="form-control form-control-civic"
+                               min="1" max="{{ hall.capacity }}"
+                               value="{{ [50, hall.capacity]|min }}" required>
                         <div class="form-text small" style="font-size:0.75rem;">Max hall capacity: {{ hall.capacity }} seats</div>
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <label class="form-label-civic">Special Arrangements or Audio/Visual Equipment (Optional)</label>
-                    <textarea name="special_requirements" class="form-control form-control-civic" rows="3" placeholder="e.g. Stage lighting, podium microphones, projector screen, catering counter setup..."></textarea>
+                    <textarea name="special_requirements" class="form-control form-control-civic" rows="3"
+                              placeholder="e.g. Stage lighting, podium microphones, projector screen, catering counter setup..."></textarea>
                 </div>
 
                 <div class="bg-light p-3 rounded mb-4 border">
@@ -89,7 +107,7 @@
     <div class="col-12 col-lg-4">
         <div class="civic-card sticky-top" style="top:85px;">
             <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">Selected Facility Summary</h6>
-            
+
             <div class="rounded overflow-hidden mb-3 border shadow-sm">
                 <img src="{{ hall.image_url }}" alt="{{ hall.name }}" style="width:100%; height:140px; object-fit:cover;">
                 <div class="p-3 bg-white">
@@ -97,13 +115,15 @@
                     <p class="small text-muted mb-2">
                         <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ hall.address or hall.location }}
                     </p>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ hall.latitude }},{{ hall.longitude }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-diamond-turn-right me-1"></i> View Route on Google Maps
+                    {# FIX 5: fa-diamond-turn-right is FA Pro only → replaced with fa-route (FA Free) #}
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ hall.latitude }},{{ hall.longitude }}"
+                       target="_blank" class="btn btn-sm btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-route me-1"></i> View Route on Google Maps
                     </a>
                 </div>
             </div>
 
-            <!-- Calculation Box -->
+            <!-- Live Calculation Box -->
             <div class="p-3 bg-light rounded border mb-3">
                 <div class="d-flex justify-content-between small text-muted mb-1">
                     <span>Base Hourly Rate:</span>
@@ -135,53 +155,74 @@
 
 {% block scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const startTimeInput = document.getElementById("start_time");
-    const endTimeInput = document.getElementById("end_time");
-    const calcHoursSpan = document.getElementById("calcHours");
-    const calcTotalSpan = document.getElementById("calcTotal");
-    const ratePerHour = {{ hall.price_per_hour }};
+    const endTimeInput   = document.getElementById("end_time");
+    const calcHoursSpan  = document.getElementById("calcHours");
+    const calcTotalSpan  = document.getElementById("calcTotal");
+    const timeError      = document.getElementById("timeError");
+    const submitBtn      = document.getElementById("submitBtn");
+    const bookingForm    = document.getElementById("bookingForm");
+    const btnText        = document.getElementById("btnText");
+    const btnLoader      = document.getElementById("btnLoader");
+    const submitHint     = document.getElementById("submitHint");
+    const ratePerHour    = {{ hall.price_per_hour }};
 
+    // Returns true when end time is strictly after start time
+    function isTimeValid() {
+        const start = startTimeInput.value;
+        const end   = endTimeInput.value;
+        if (!start || !end) return true; // let HTML5 required handle empty
+        const [sH, sM] = start.split(":").map(Number);
+        const [eH, eM] = end.split(":").map(Number);
+        return (eH * 60 + eM) > (sH * 60 + sM);
+    }
+
+    // FIX 4: Update the live cost card AND toggle submit button / warning
     function updateCalculations() {
         const start = startTimeInput.value;
-        const end = endTimeInput.value;
+        const end   = endTimeInput.value;
         if (!start || !end) return;
 
         const [sH, sM] = start.split(":").map(Number);
         const [eH, eM] = end.split(":").map(Number);
-
-        let sMin = sH * 60 + sM;
-        let eMin = eH * 60 + eM;
+        const sMin = sH * 60 + sM;
+        const eMin = eH * 60 + eM;
 
         if (eMin > sMin) {
             let diffHours = (eMin - sMin) / 60.0;
             if (diffHours < 1.0) diffHours = 1.0;
             diffHours = Math.round(diffHours * 100) / 100;
             calcHoursSpan.textContent = diffHours.toFixed(1) + " Hours";
-            const total = Math.round(diffHours * ratePerHour);
-            calcTotalSpan.textContent = "₹" + total;
+            calcTotalSpan.textContent = "₹" + Math.round(diffHours * ratePerHour);
+            timeError.style.display = "none";
+            submitBtn.disabled = false;
         } else {
             calcHoursSpan.textContent = "Invalid Time";
             calcTotalSpan.textContent = "₹0";
+            timeError.style.display = "block";  // show inline warning
+            submitBtn.disabled = true;           // block submission
         }
     }
 
     startTimeInput.addEventListener("change", updateCalculations);
     endTimeInput.addEventListener("change", updateCalculations);
-    updateCalculations();
+    updateCalculations(); // run on page load with default values
 
-    // Form submit: show loading spinner, prevent double-submit
-    const bookingForm = document.getElementById("bookingForm");
-    const submitBtn = document.getElementById("submitBtn");
-    const btnText = document.getElementById("btnText");
-    const btnLoader = document.getElementById("btnLoader");
-    const submitHint = document.getElementById("submitHint");
-
-    bookingForm.addEventListener("submit", function() {
-        btnText.style.display = "none";
-        btnLoader.style.display = "inline-flex";
+    // Form submit: final guard + loading spinner (prevents double-submit)
+    bookingForm.addEventListener("submit", function (e) {
+        // FIX 4: Hard block if times are still invalid (edge case safety net)
+        if (!isTimeValid()) {
+            e.preventDefault();
+            timeError.style.display = "block";
+            submitBtn.disabled = true;
+            return;
+        }
+        // Show spinner and disable button to prevent double-submission
+        btnText.style.display    = "none";
+        btnLoader.style.display  = "inline-flex";
         submitHint.style.display = "block";
-        submitBtn.disabled = true;
+        submitBtn.disabled       = true;
     });
 });
 </script>

@@ -1,13 +1,32 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, abort
 from flask_mail import Mail, Message
 import re
 import uuid
+import secrets
 from datetime import datetime
 from functools import wraps
 import db
 
 app = Flask(__name__)
 app.secret_key = "community_hall_secret_key_vtu_sdg11"
+
+# ----- CSRF Protection (lightweight, no external library needed) -----
+def generate_csrf_token():
+    """Generate and store a CSRF token in the session if not already set."""
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_hex(32)
+    return session["csrf_token"]
+
+def validate_csrf():
+    """Validate the submitted CSRF token against the one stored in the session."""
+    token = request.form.get("csrf_token", "")
+    if not token or token != session.get("csrf_token"):
+        abort(403)  # Forbidden – likely a CSRF attempt
+
+@app.context_processor
+def inject_csrf_token():
+    """Make csrf_token available in every template automatically."""
+    return dict(csrf_token=generate_csrf_token())
 
 # Initialize SQLite database and default seed data
 db.init_db()
@@ -231,6 +250,7 @@ def book_hall(hall_id):
     today_str = datetime.now().strftime("%Y-%m-%d")
     
     if request.method == "POST":
+        validate_csrf()   # FIX 1: Reject requests with missing/invalid CSRF token
         booking_date = request.form.get("booking_date")
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
