@@ -17,63 +17,107 @@
                     <h4 class="fw-bold text-dark mb-1">Public Hall Reservation Application</h4>
                     <span class="text-muted small">Municipal Civic Asset Allocation Form</span>
                 </div>
-                <span class="badge bg-primary fs-6">Official Tariff: ₹{{ hall.price_per_hour|int }}/hr</span>
+                <span class="badge bg-primary fs-6">Official Tariff: &#8377;{{ hall.price_per_hour|int }}/hr</span>
             </div>
 
             {% if msg %}
-            <div class="alert alert-danger py-2 px-3 small mb-4">
+            <div class="alert alert-danger py-2 px-3 small mb-4" role="alert">
                 <i class="fas fa-exclamation-triangle me-1"></i> {{ msg }}
             </div>
             {% endif %}
 
-            {# FIX 1 & 2: Explicit action URL + CSRF hidden token #}
-            <form method="POST" action="{{ url_for('book_hall', hall_id=hall.id) }}" id="bookingForm" novalidate>
+            <!-- FIX 1 & 2: Explicit action URL + CSRF hidden token -->
+            <form method="POST"
+                  action="{{ url_for('book_hall', hall_id=hall.id) }}"
+                  id="bookingForm"
+                  novalidate>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6">
-                        <label class="form-label-civic">Event Date <span class="text-danger">*</span></label>
-                        <input type="date" name="booking_date" id="booking_date"
+                        <label for="booking_date" class="form-label-civic">
+                            Event Date <span class="text-danger">*</span>
+                        </label>
+                        <input type="date"
+                               name="booking_date"
+                               id="booking_date"
                                class="form-control form-control-civic"
-                               min="{{ today }}" value="{{ today }}" required>
+                               min="{{ today }}"
+                               value="{{ today }}"
+                               required>
                     </div>
                     <div class="col-6 col-md-3">
-                        <label class="form-label-civic">Start Time <span class="text-danger">*</span></label>
-                        <input type="time" name="start_time" id="start_time"
-                               class="form-control form-control-civic" value="09:00" required>
+                        <label for="start_time" class="form-label-civic">
+                            Start Time <span class="text-danger">*</span>
+                        </label>
+                        <input type="time"
+                               name="start_time"
+                               id="start_time"
+                               class="form-control form-control-civic"
+                               value="09:00"
+                               required>
                     </div>
                     <div class="col-6 col-md-3">
-                        <label class="form-label-civic">End Time <span class="text-danger">*</span></label>
-                        <input type="time" name="end_time" id="end_time"
-                               class="form-control form-control-civic" value="13:00" required>
+                        <label for="end_time" class="form-label-civic">
+                            End Time <span class="text-danger">*</span>
+                        </label>
+                        <input type="time"
+                               name="end_time"
+                               id="end_time"
+                               class="form-control form-control-civic"
+                               value="13:00"
+                               required>
                     </div>
                 </div>
 
-                {# FIX 4: Inline time validation warning #}
-                <div id="timeError" class="alert alert-warning py-2 px-3 small mb-3" style="display:none;">
+                <!-- FIX 4: Inline time validation warning (hidden by default) -->
+                <div id="timeError"
+                     class="alert alert-warning py-2 px-3 small mb-3"
+                     role="alert"
+                     style="display:none;">
                     <i class="fas fa-exclamation-triangle me-1"></i>
                     End time must be <strong>after</strong> start time. Please correct before submitting.
                 </div>
 
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-8">
-                        <label class="form-label-civic">Event Purpose / Title <span class="text-danger">*</span></label>
-                        <input type="text" name="purpose" class="form-control form-control-civic"
-                               placeholder="e.g. Annual Youth Skill Workshop, Cultural Fest, Society Meeting" required>
+                        <label for="purpose" class="form-label-civic">
+                            Event Purpose / Title <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               name="purpose"
+                               id="purpose"
+                               class="form-control form-control-civic"
+                               placeholder="e.g. Annual Youth Skill Workshop, Cultural Fest, Society Meeting"
+                               required>
                     </div>
                     <div class="col-12 col-md-4">
-                        <label class="form-label-civic">Expected Attendees <span class="text-danger">*</span></label>
-                        {# FIX 3: Default value capped to hall capacity so it never pre-fills an invalid number #}
-                        <input type="number" name="attendees" class="form-control form-control-civic"
-                               min="1" max="{{ hall.capacity }}"
-                               value="{{ [50, hall.capacity]|min }}" required>
-                        <div class="form-text small" style="font-size:0.75rem;">Max hall capacity: {{ hall.capacity }} seats</div>
+                        <label for="attendees" class="form-label-civic">
+                            Expected Attendees <span class="text-danger">*</span>
+                        </label>
+                        <!-- FIX 3: Default capped to hall capacity to avoid pre-filled invalid value -->
+                        <input type="number"
+                               name="attendees"
+                               id="attendees"
+                               class="form-control form-control-civic"
+                               min="1"
+                               max="{{ hall.capacity }}"
+                               value="{{ [50, hall.capacity]|min }}"
+                               required>
+                        <div class="form-text small" style="font-size:0.75rem;">
+                            Max hall capacity: {{ hall.capacity }} seats
+                        </div>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label-civic">Special Arrangements or Audio/Visual Equipment (Optional)</label>
-                    <textarea name="special_requirements" class="form-control form-control-civic" rows="3"
+                    <label for="special_requirements" class="form-label-civic">
+                        Special Arrangements or Audio/Visual Equipment (Optional)
+                    </label>
+                    <textarea name="special_requirements"
+                              id="special_requirements"
+                              class="form-control form-control-civic"
+                              rows="3"
                               placeholder="e.g. Stage lighting, podium microphones, projector screen, catering counter setup..."></textarea>
                 </div>
 
@@ -91,13 +135,16 @@
                 </div>
 
                 <button type="submit" id="submitBtn" class="btn btn-civic w-100 justify-content-center py-2 fs-6">
-                    <span id="btnText"><i class="fas fa-check-circle me-1"></i> Submit Hall Booking Request</span>
+                    <span id="btnText">
+                        <i class="fas fa-check-circle me-1"></i> Submit Hall Booking Request
+                    </span>
                     <span id="btnLoader" style="display:none;">
-                        <span class="spinner-border spinner-border-sm me-2" role="status"></span> Submitting... Please wait
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Submitting... Please wait
                     </span>
                 </button>
                 <p class="text-muted text-center mt-2 small" id="submitHint" style="display:none;">
-                    <i class="fas fa-info-circle me-1"></i> Server is processing your request, this may take 10–20 seconds...
+                    <i class="fas fa-info-circle me-1"></i> Server is processing your request, this may take 10&#8211;20 seconds...
                 </p>
             </form>
         </div>
@@ -109,15 +156,21 @@
             <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">Selected Facility Summary</h6>
 
             <div class="rounded overflow-hidden mb-3 border shadow-sm">
-                <img src="{{ hall.image_url }}" alt="{{ hall.name }}" style="width:100%; height:140px; object-fit:cover;">
+                <img src="{{ hall.image_url }}"
+                     alt="{{ hall.name }}"
+                     style="width:100%; height:140px; object-fit:cover;">
                 <div class="p-3 bg-white">
                     <h6 class="fw-bold text-dark mb-1">{{ hall.name }}</h6>
                     <p class="small text-muted mb-2">
-                        <i class="fas fa-map-marker-alt text-danger me-1"></i>{{ hall.address or hall.location }}
+                        <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                        {{ hall.address or hall.location }}
                     </p>
-                    {# FIX 5: fa-diamond-turn-right is FA Pro only → replaced with fa-route (FA Free) #}
-                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ hall.latitude }},{{ hall.longitude }}"
-                       target="_blank" class="btn btn-sm btn-outline-primary w-100 mb-2">
+                    <!-- FIX 5: fa-diamond-turn-right is FA Pro only - replaced with fa-route (FA Free) -->
+                    <!-- FIX: & in href encoded as &amp; to pass HTML validation -->
+                    <a href="https://www.google.com/maps/dir/?api=1&amp;destination={{ hall.latitude }},{{ hall.longitude }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-sm btn-outline-primary w-100 mb-2">
                         <i class="fas fa-route me-1"></i> View Route on Google Maps
                     </a>
                 </div>
@@ -127,7 +180,7 @@
             <div class="p-3 bg-light rounded border mb-3">
                 <div class="d-flex justify-content-between small text-muted mb-1">
                     <span>Base Hourly Rate:</span>
-                    <span class="fw-bold text-dark">₹{{ hall.price_per_hour|int }} / hr</span>
+                    <span class="fw-bold text-dark">&#8377;{{ hall.price_per_hour|int }} / hr</span>
                 </div>
                 <div class="d-flex justify-content-between small text-muted mb-1">
                     <span>Calculated Duration:</span>
@@ -140,12 +193,15 @@
                 <hr class="my-2">
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="fw-bold text-dark">Total Fee:</span>
-                    <span class="text-primary fw-bolder fs-4" id="calcTotal">₹{{ (hall.price_per_hour * 4)|int }}</span>
+                    <span class="text-primary fw-bolder fs-4" id="calcTotal">
+                        &#8377;{{ (hall.price_per_hour * 4)|int }}
+                    </span>
                 </div>
             </div>
 
             <div class="small text-muted" style="font-size:0.75rem;">
-                <i class="fas fa-info-circle text-primary me-1"></i> <strong>Automated Verification:</strong>
+                <i class="fas fa-info-circle text-primary me-1"></i>
+                <strong>Automated Verification:</strong>
                 Slot collisions are blocked automatically. Municipal officers review applications within 24 working hours.
             </div>
         </div>
@@ -156,69 +212,66 @@
 {% block scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const startTimeInput = document.getElementById("start_time");
-    const endTimeInput   = document.getElementById("end_time");
-    const calcHoursSpan  = document.getElementById("calcHours");
-    const calcTotalSpan  = document.getElementById("calcTotal");
-    const timeError      = document.getElementById("timeError");
-    const submitBtn      = document.getElementById("submitBtn");
-    const bookingForm    = document.getElementById("bookingForm");
-    const btnText        = document.getElementById("btnText");
-    const btnLoader      = document.getElementById("btnLoader");
-    const submitHint     = document.getElementById("submitHint");
-    const ratePerHour    = {{ hall.price_per_hour }};
+    var startTimeInput = document.getElementById("start_time");
+    var endTimeInput   = document.getElementById("end_time");
+    var calcHoursSpan  = document.getElementById("calcHours");
+    var calcTotalSpan  = document.getElementById("calcTotal");
+    var timeError      = document.getElementById("timeError");
+    var submitBtn      = document.getElementById("submitBtn");
+    var bookingForm    = document.getElementById("bookingForm");
+    var btnText        = document.getElementById("btnText");
+    var btnLoader      = document.getElementById("btnLoader");
+    var submitHint     = document.getElementById("submitHint");
+    var ratePerHour    = {{ hall.price_per_hour | tojson }};
 
-    // Returns true when end time is strictly after start time
     function isTimeValid() {
-        const start = startTimeInput.value;
-        const end   = endTimeInput.value;
-        if (!start || !end) return true; // let HTML5 required handle empty
-        const [sH, sM] = start.split(":").map(Number);
-        const [eH, eM] = end.split(":").map(Number);
-        return (eH * 60 + eM) > (sH * 60 + sM);
+        var start = startTimeInput.value;
+        var end   = endTimeInput.value;
+        if (!start || !end) { return true; }
+        var startParts = start.split(":");
+        var endParts   = end.split(":");
+        var sMin = parseInt(startParts[0], 10) * 60 + parseInt(startParts[1], 10);
+        var eMin = parseInt(endParts[0],   10) * 60 + parseInt(endParts[1],   10);
+        return eMin > sMin;
     }
 
-    // FIX 4: Update the live cost card AND toggle submit button / warning
     function updateCalculations() {
-        const start = startTimeInput.value;
-        const end   = endTimeInput.value;
-        if (!start || !end) return;
+        var start = startTimeInput.value;
+        var end   = endTimeInput.value;
+        if (!start || !end) { return; }
 
-        const [sH, sM] = start.split(":").map(Number);
-        const [eH, eM] = end.split(":").map(Number);
-        const sMin = sH * 60 + sM;
-        const eMin = eH * 60 + eM;
+        var startParts = start.split(":");
+        var endParts   = end.split(":");
+        var sMin = parseInt(startParts[0], 10) * 60 + parseInt(startParts[1], 10);
+        var eMin = parseInt(endParts[0],   10) * 60 + parseInt(endParts[1],   10);
 
         if (eMin > sMin) {
-            let diffHours = (eMin - sMin) / 60.0;
-            if (diffHours < 1.0) diffHours = 1.0;
+            var diffHours = (eMin - sMin) / 60.0;
+            if (diffHours < 1.0) { diffHours = 1.0; }
             diffHours = Math.round(diffHours * 100) / 100;
             calcHoursSpan.textContent = diffHours.toFixed(1) + " Hours";
-            calcTotalSpan.textContent = "₹" + Math.round(diffHours * ratePerHour);
-            timeError.style.display = "none";
-            submitBtn.disabled = false;
+            calcTotalSpan.textContent = "\u20B9" + Math.round(diffHours * ratePerHour);
+            timeError.style.display   = "none";
+            submitBtn.disabled        = false;
         } else {
             calcHoursSpan.textContent = "Invalid Time";
-            calcTotalSpan.textContent = "₹0";
-            timeError.style.display = "block";  // show inline warning
-            submitBtn.disabled = true;           // block submission
+            calcTotalSpan.textContent = "\u20B90";
+            timeError.style.display   = "block";
+            submitBtn.disabled        = true;
         }
     }
 
     startTimeInput.addEventListener("change", updateCalculations);
     endTimeInput.addEventListener("change", updateCalculations);
-    updateCalculations(); // run on page load with default values
+    updateCalculations();
 
-    // Form submit: final guard + loading spinner (prevents double-submit)
     bookingForm.addEventListener("submit", function (e) {
-        // FIX 4: Hard block if times are still invalid (edge case safety net)
         if (!isTimeValid()) {
             e.preventDefault();
             timeError.style.display = "block";
-            submitBtn.disabled = true;
+            submitBtn.disabled      = true;
             return;
         }
-        // Show spinner and disable button to prevent double-submission
         btnText.style.display    = "none";
         btnLoader.style.display  = "inline-flex";
         submitHint.style.display = "block";
