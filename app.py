@@ -3,12 +3,23 @@ from flask_mail import Mail, Message
 import re
 import uuid
 import secrets
+import random
+import string
+import os
 from datetime import datetime
 from functools import wraps
 import db
 
 app = Flask(__name__)
 app.secret_key = "community_hall_secret_key_vtu_sdg11"
+
+# App config must be set before Mail(app) is called
+app.config["MAIL_SERVER"]   = "smtp.gmail.com"
+app.config["MAIL_PORT"]     = 587
+app.config["MAIL_USE_TLS"]  = True
+app.config["MAIL_USERNAME"] = "ganistar6360@gmail.com"
+app.config["MAIL_PASSWORD"] = "ifxh fypd ysyv iqjs"
+mail = Mail(app)
 
 # ----- CSRF Protection (lightweight, no external library needed) -----
 def generate_csrf_token():
@@ -30,14 +41,6 @@ def inject_csrf_token():
 
 # Initialize SQLite database and default seed data
 db.init_db()
-
-# Optional Flask-Mail configuration
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = "ganistar6360@gmail.com"
-app.config["MAIL_PASSWORD"] = "ifxh fypd ysyv iqjs"
-mail = Mail(app)
 
 def send_notification_email(recipient, subject, body):
     try:
@@ -250,12 +253,16 @@ def book_hall(hall_id):
     today_str = datetime.now().strftime("%Y-%m-%d")
     
     if request.method == "POST":
-        validate_csrf()   # FIX 1: Reject requests with missing/invalid CSRF token
+        validate_csrf()   # CSRF check
         booking_date = request.form.get("booking_date")
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
         purpose = request.form.get("purpose", "").strip()
-        attendees = int(request.form.get("attendees", 1))
+        # FIX: safe int cast with fallback to prevent ValueError 500
+        try:
+            attendees = int(request.form.get("attendees", 1))
+        except (ValueError, TypeError):
+            attendees = 1
         special_req = request.form.get("special_requirements", "").strip()
 
         # Validation
@@ -319,6 +326,7 @@ def my_bookings():
 @app.route("/cancel-booking/<int:booking_id>", methods=["POST"])
 @login_required
 def cancel_booking(booking_id):
+    validate_csrf()
     b = db.get_booking_by_id(booking_id)
     if b and b["user_id"] == session["user_id"]:
         if b["status"] in ["pending", "approved"]:
@@ -335,6 +343,7 @@ import string
 @app.route("/pay-booking/<int:booking_id>", methods=["POST"])
 @login_required
 def pay_booking(booking_id):
+    validate_csrf()
     booking = db.get_booking_by_id(booking_id)
     if not booking or booking["user_id"] != session["user_id"]:
         flash("Booking not found.", "danger")
@@ -399,6 +408,7 @@ def admin_panel():
 @app.route("/admin/approve/<int:booking_id>", methods=["POST"])
 @admin_required
 def approve_booking(booking_id):
+    validate_csrf()
     booking = db.get_booking_by_id(booking_id)
     if booking:
         db.update_booking_status(booking_id, "approved")
@@ -413,6 +423,7 @@ def approve_booking(booking_id):
 @app.route("/admin/reject/<int:booking_id>", methods=["POST"])
 @admin_required
 def reject_booking(booking_id):
+    validate_csrf()
     reason = request.form.get("reason", "Hall unavailable for requested slot").strip()
     booking = db.get_booking_by_id(booking_id)
     if booking:
@@ -428,6 +439,7 @@ def reject_booking(booking_id):
 @app.route("/admin/schedule-maintenance", methods=["POST"])
 @admin_required
 def schedule_maintenance():
+    validate_csrf()
     hall_id = int(request.form.get("hall_id"))
     hall = db.get_hall_by_id(hall_id)
     maintenance_type = request.form.get("maintenance_type", "General Inspection")
@@ -443,6 +455,7 @@ def schedule_maintenance():
 @app.route("/admin/complete-maintenance/<int:mid>/<int:hall_id>", methods=["POST"])
 @admin_required
 def complete_maintenance(mid, hall_id):
+    validate_csrf()
     db.complete_maintenance(mid, hall_id)
     flash("Maintenance marked as completed and hall status restored to available.", "success")
     return redirect(url_for("admin_panel"))
@@ -450,6 +463,7 @@ def complete_maintenance(mid, hall_id):
 @app.route("/admin/update-hall-status/<int:hall_id>", methods=["POST"])
 @admin_required
 def update_hall_status(hall_id):
+    validate_csrf()
     new_status = request.form.get("status", "available")
     db.update_hall_status(hall_id, new_status)
     flash("Hall status updated.", "success")
@@ -462,6 +476,7 @@ def profile():
     user = db.get_user_by_id(session["user_id"])
     msg = ""
     if request.method == "POST":
+        validate_csrf()
         phone = request.form.get("phone", "").strip()
         email = request.form.get("email", "").strip()
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
@@ -581,5 +596,6 @@ def not_found(e):
     return render_template("login.html", msg="404: The requested page was not found."), 404
 
 if __name__ == "__main__":
-    # Host on 0.0.0.0 so phone can connect via Wi-Fi IP address
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # Use DEBUG env var so production runs with debug=False
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=5000, debug=debug_mode)

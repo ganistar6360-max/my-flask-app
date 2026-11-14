@@ -1,0 +1,980 @@
+=== PAGE 1 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+LIBRARY MANAGEMENT SYSTEM 
+A Complete Software Development Life Cycle (SDLC) Project Report 
+ 
+ 
+Submitted in partial fulfillment of the requirements for the award of 
+B.E. / B.Tech 
+ 
+ 
+Academic Community Project Report 
+ 
+ 
+ 
+Student Name: ______________________________ 
+USN / Register No.: ________________________ 
+Department: _________________________________ 
+Institution: _________________________________ 
+Academic Year: 2026–2027 
+ 
+ 
+ 
+Technology Stack: Python • Flask • MySQL • HTML • CSS • Bootstrap • JavaScript 
+  
+
+=== PAGE 2 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+CERTIFICATE 
+This is to certify that the project report entitled “Library Management System” is a bonafide work carried out 
+by ______________________________, bearing USN/Register No. __________________, in partial 
+fulfillment of the academic requirements for the award of the degree of B.E./B.Tech/MCA in 
+______________________________ during the academic year 2026–2027. 
+ 
+ 
+Role Name Signature 
+Project Guide ____________________________  ________________ 
+Head of Department ____________________________  ________________ 
+External/Internal Examiner ____________________________  ________________ 
+  
+
+=== PAGE 3 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+DECLARATION 
+I hereby declare that the project work entitled “Library Management System” is an original academic work 
+carried out by me under the guidance of the project supervisor. The work presented in this report has been 
+prepared for educational purposes and has not been submitted elsewhere for the award of any degree or 
+qualification. 
+ 
+Student Signature: ____________________    Date: ______________ 
+  
+
+=== PAGE 4 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+ACKNOWLEDGEMENT 
+I express my sincere gratitude to my project guide, Head of the Department, faculty members, institution, 
+friends and family for their guidance and support in completing the Library Management System project. I 
+also acknowledge the open-source software communities whose tools and documentation supported the 
+implementation. 
+  
+
+=== PAGE 5 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+ABSTRACT 
+The Library Management System (LMS) is a web-based application designed to automate the major activities 
+of a library, including book catalogue management, member registration, book issue and return, searching, 
+overdue tracking and fine management. The system replaces repetitive manual record keeping with a 
+centralized database and role-based access. The proposed system is implemented using Python Flask for the 
+application layer, MySQL for persistent data storage, and HTML/CSS/Bootstrap/JavaScript for the user 
+interface. The project follows the Software Development Life Cycle (SDLC), covering planning, requirements 
+analysis, feasibility study, system design, implementation, testing, deployment and maintenance. The report 
+documents the requirements, architecture, database design, diagrams, test cases, source code and deployment 
+procedure. The design is intentionally modular so that it can be extended with barcode/QR scanning, email 
+notifications, online reservations, analytics and cloud deployment. 
+Keywords 
+Library Automation, Library Management System, SDLC, Flask, Python, MySQL, CRUD, Web Application, 
+Database Management, Book Issue and Return 
+  
+
+=== PAGE 6 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+TABLE OF CONTENTS 
+1. Introduction 
+2. Problem Statement 
+3. Objectives 
+4. Scope 
+5. Existing and Proposed System 
+6. Software Development Life Cycle 
+7. Feasibility Study 
+8. Requirements Analysis 
+9. System Analysis 
+10. System Design 
+11. Database Design 
+12. System Architecture 
+13. Implementation 
+14. Source Code 
+15. Testing 
+16. Security 
+17. Deployment 
+18. Maintenance 
+19. Limitations 
+20. Future Enhancements 
+21. Conclusion 
+22. References 
+23. Viva-Voce Questions and Answers 
+24. Application Screenshots 
+  
+
+=== PAGE 7 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+1. INTRODUCTION 
+A library maintains a large volume of information about books, members and circulation transactions. In a 
+manual system, maintaining registers, searching for books, tracking due dates and calculating fines can be 
+time-consuming and error-prone. A computerized Library Management System provides a centralized 
+platform for storing, retrieving and updating this information. 
+The proposed system is a web application that allows an administrator/librarian to manage books and members 
+and to record issue/return transactions. It provides a simple search facility and maintains transaction history. 
+The application is designed as an academic reference implementation and can be adapted to a college, school, 
+public or departmental library. 
+2. PROBLEM STATEMENT 
+The manual or semi-manual library process creates difficulties in maintaining accurate records, locating books 
+quickly, identifying overdue loans, calculating fines and preparing reports. The project therefore aims to 
+develop a reliable web-based system that centralizes library records and automates routine circulation 
+operations. 
+3. OBJECTIVES 
+• Maintain a centralized catalogue of books and categories. 
+• Register and manage library members. 
+• Provide fast book and member search. 
+• Record book issue and return transactions. 
+• Automatically identify overdue books and calculate fines. 
+• Provide dashboard statistics and basic reports. 
+• Protect administrative functions through authentication. 
+• Maintain transaction history for accountability. 
+• Provide a modular codebase that can be extended in future. 
+4. SCOPE 
+In Scope Out of Scope / Future 
+Book CRUD and search Online payment gateway 
+Member CRUD Mobile application 
+Issue/return management Biometric authentication 
+Due-date and fine calculation Advanced recommendation engine 
+Admin login Multi-branch synchronization 
+Dashboard and basic reports Cloud auto-scaling 
+
+=== PAGE 8 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+5. EXISTING AND PROPOSED SYSTEM 
+Aspect Existing Manual System Proposed LMS 
+Record keeping Registers/spreadsheets Centralized MySQL database 
+Search Manual lookup Keyword-based search 
+Issue/return Manual entry Web transaction workflow 
+Fine calculation Manual Automated 
+Reports Time-consuming Dashboard/query based 
+Access control Physical controls Authenticated application 
+Auditability Difficult Transaction history 
+6. SOFTWARE DEVELOPMENT LIFE CYCLE 
+The project follows a structured SDLC. Each phase produces artifacts that guide the next phase and provide 
+traceability from requirements to implementation and testing. 
+6.1 Planning 
+Define the problem, stakeholders, project objectives, scope, technology stack, milestones and expected 
+deliverables. 
+6.2 Requirements Analysis 
+Identify functional and non-functional requirements through stakeholder discussions and analysis of library 
+workflows. 
+6.3 Feasibility Study 
+Evaluate technical, economic, operational and schedule feasibility. 
+6.4 System Analysis 
+Model actors, workflows, data entities, inputs, outputs and business rules. 
+6.5 System Design 
+Design architecture, database schema, UI navigation, modules, interfaces and security controls. 
+6.6 Implementation 
+Develop the Flask application, database schema, templates and business logic. 
+6.7 Testing 
+Verify individual functions, integration, workflows, validation, security and user acceptance. 
+6.8 Deployment 
+Configure Python environment, MySQL database, application settings and web server. 
+6.9 Maintenance 
+Correct defects, improve performance, update dependencies, back up data and add enhancements. 
+7. FEASIBILITY STUDY 
+Feasibility Assessment 
+
+=== PAGE 9 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+Technical 
+Feasible using Python, Flask, MySQL and standard 
+web technologies. No specialized hardware is 
+required. 
+Economic 
+Open-source technologies reduce licensing cost. 
+Hosting and maintenance costs depend on 
+deployment scale. 
+Operational The workflows match common library activities and require limited user training. 
+Schedule 
+A minimum viable system can be developed in 
+stages: requirements, database, modules, testing and 
+deployment. 
+Legal/Ethical 
+The deployed system should follow institutional 
+policies for personal data, access control and 
+retention. 
+8. REQUIREMENTS ANALYSIS 
+8.1 Functional Requirements 
+FR-01: Administrator shall authenticate using username and password. 
+FR-02: Administrator shall add, edit, delete and search books. 
+FR-03: Administrator shall create and update member records. 
+FR-04: Administrator shall issue an available book to an active member. 
+FR-05: Administrator shall record a book return. 
+FR-06: System shall prevent issuing a book that is unavailable. 
+FR-07: System shall calculate an overdue fine based on configured daily rate. 
+FR-08: System shall display dashboard counts. 
+FR-09: System shall display active and overdue transactions. 
+FR-10: System shall retain issue/return transaction records. 
+8.2 Non-Functional Requirements 
+• Usability: simple navigation and clear validation messages. 
+• Performance: normal CRUD/search operations should respond quickly on a properly configured 
+local/network deployment. 
+• Reliability: transactions should be stored consistently in the database. 
+• Security: passwords must be stored as hashes; protected routes require authentication. 
+• Maintainability: modular Flask routes, templates and database schema. 
+• Scalability: database and application layers can be separated for larger deployments. 
+
+=== PAGE 10 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+8.3 Hardware/Software Requirements 
+Category Minimum Reference 
+CPU Dual-core processor or better 
+RAM 4 GB or more 
+Storage 2 GB free for development; more for production data/backups 
+OS Windows/Linux/macOS 
+Python 3.10+ recommended 
+Database MySQL 8.x 
+Browser Chrome/Edge/Firefox 
+Development VS Code or equivalent IDE 
+9. SYSTEM ANALYSIS 
+9.1 Actors 
+Actor Responsibilities 
+Administrator/Librarian Manage books, members, issue/return transactions, view reports. 
+Member Library stakeholder whose membership and borrowing transactions are recorded. 
+9.2 Core Business Rules 
+• A book can be issued only when its available quantity is greater than zero. 
+• A member must be active to receive a book. 
+• One issue transaction represents one book loan. 
+• Returning an active loan updates the return date and book availability. 
+• Fine = overdue days × daily fine rate. 
+• An administrator must authenticate before accessing protected management functions. 
+10. SYSTEM DESIGN 
+10.1 Use Case Diagram (Textual Representation) 
+                 +-----------------------------+ 
+                 |  Library Management System  | 
+                 +-----------------------------+ 
+                    ^      ^       ^       ^ 
+                    |      |       |       | 
+              Login/Manage  Search  Issue   Return 
+                    |      |       |       | 
+              +-----+------+-------+-------+-----+ 
+              |       Administrator / Librarian  | 
+              +----------------------------------+ 
+                           | 
+                           v 
+
+=== PAGE 11 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+                       Reports 
+ 
+10.2 Data Flow Diagram – Level 0 
+[Administrator] 
+      | 
+      | login / book / member / issue / return 
+      v 
++--------------------------+ 
+| Library Management       | 
+| System                   | 
++--------------------------+ 
+      | 
+      | read/write 
+      v 
++--------------------------+ 
+| MySQL Database           | 
++--------------------------+ 
+      | 
+      v 
+[Dashboard / Reports / Search Results] 
+ 
+10.3 Data Flow Diagram – Level 1 
+Admin -> Authentication -> Users 
+Admin -> Book Management -> Books / Categories 
+Admin -> Member Management -> Members 
+Admin -> Issue Management -> Book Issues -> Books 
+Admin -> Return Management -> Book Issues -> Books 
+Book Issues -> Fine Calculation -> Fine/Report Output 
+ 
+10.4 ER Diagram (Logical Representation) 
+CATEGORIES 1 -------- * BOOKS 
+                         | 
+                         | 1 
+                         | 
+                         * BOOK_ISSUES * -------- 1 MEMBERS 
+                              | 
+                              | 
+                              *  
+                           USERS (created_by) 
+ 
+BOOKS: book_id, isbn, title, author, category_id, quantity, available_quantity 
+MEMBERS: member_id, name, email, phone, address, status 
+BOOK_ISSUES: issue_id, book_id, member_id, issue_date, due_date, return_date, fine 
+USERS: user_id, username, password_hash, role 
+ 
+10.5 Class/Module Design 
+Module/Class Concept Responsibility 
+User Authentication and role information 
+Book Book catalogue and availability 
+Member Member profile and status 
+BookIssue Loan transaction, return and fine 
+Database Layer Connection and SQL execution 
+
+=== PAGE 12 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+Flask Routes HTTP request handling and validation 
+Templates Presentation/UI 
+11. DATABASE DESIGN 
+Table Primary Key Important Fields 
+users user_id username, password_hash, role 
+categories category_id name 
+books book_id isbn, title, author, category_id, quantity, available_quantity 
+members member_id name, email, phone, address, status 
+book_issues issue_id 
+book_id, member_id, issue_date, 
+due_date, return_date, fine, status, 
+issued_by 
+11.1 Database SQL 
+CREATE DATABASE library_db; 
+USE library_db; 
+ 
+CREATE TABLE users ( 
+  user_id INT AUTO_INCREMENT PRIMARY KEY, 
+  username VARCHAR(50) NOT NULL UNIQUE, 
+  password_hash VARCHAR(255) NOT NULL, 
+  role VARCHAR(20) NOT NULL DEFAULT 'admin' 
+); 
+ 
+CREATE TABLE categories ( 
+  category_id INT AUTO_INCREMENT PRIMARY KEY, 
+  name VARCHAR(100) NOT NULL UNIQUE 
+); 
+ 
+CREATE TABLE books ( 
+  book_id INT AUTO_INCREMENT PRIMARY KEY, 
+  isbn VARCHAR(30) UNIQUE, 
+  title VARCHAR(200) NOT NULL, 
+  author VARCHAR(150) NOT NULL, 
+  category_id INT, 
+  quantity INT NOT NULL DEFAULT 1, 
+  available_quantity INT NOT NULL DEFAULT 1, 
+  FOREIGN KEY (category_id) REFERENCES categories(category_id) 
+); 
+ 
+CREATE TABLE members ( 
+  member_id INT AUTO_INCREMENT PRIMARY KEY, 
+  name VARCHAR(150) NOT NULL, 
+  email VARCHAR(150) UNIQUE, 
+  phone VARCHAR(20), 
+  address VARCHAR(255), 
+  status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' 
+); 
+ 
+CREATE TABLE book_issues ( 
+  issue_id INT AUTO_INCREMENT PRIMARY KEY, 
+  book_id INT NOT NULL, 
+  member_id INT NOT NULL, 
+  issue_date DATE NOT NULL, 
+
+=== PAGE 13 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+  due_date DATE NOT NULL, 
+  return_date DATE NULL, 
+  fine DECIMAL(10,2) NOT NULL DEFAULT 0, 
+  status VARCHAR(20) NOT NULL DEFAULT 'ISSUED', 
+  issued_by INT, 
+  FOREIGN KEY (book_id) REFERENCES books(book_id), 
+  FOREIGN KEY (member_id) REFERENCES members(member_id), 
+  FOREIGN KEY (issued_by) REFERENCES users(user_id) 
+); 
+ 
+12. SYSTEM ARCHITECTURE 
++------------------+ 
+| Web Browser      | 
+| HTML/CSS/JS      | 
++--------+---------+ 
+         | 
+         | HTTP 
+         v 
++------------------+ 
+| Flask Web App    | 
+| Routes/Business  | 
+| Logic/Auth       | 
++--------+---------+ 
+         | 
+         | SQL 
+         v 
++------------------+ 
+| MySQL Database   | 
++------------------+ 
+ 
+The presentation layer handles user interaction. Flask routes provide application logic and validation. MySQL 
+provides persistent storage. In production, the Flask application can be served behind a production WSGI 
+server and reverse proxy. 
+13. IMPLEMENTATION 
+13.1 Project Folder Structure 
+library-management-system/ 
+├── app.py 
+├── schema.sql 
+├── requirements.txt 
+├── README.md 
+└── templates/ 
+    ├── base.html 
+    ├── login.html 
+    ├── dashboard.html 
+    ├── books.html 
+    ├── members.html 
+    └── issues.html 
+ 
+
+=== PAGE 14 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+13.2 requirements.txt 
+Flask==3.1.2 
+mysql-connector-python==9.4.0 
+Werkzeug==3.1.3 
+ 
+14. SOURCE CODE 
+14.1 app.py 
+from flask import Flask, render_template, request, redirect, url_for, session, flash 
+import mysql.connector 
+from werkzeug.security import generate_password_hash, check_password_hash 
+from functools import wraps 
+from datetime import date, timedelta 
+ 
+app = Flask(__name__) 
+app.secret_key = "CHANGE_THIS_SECRET_KEY" 
+ 
+DB = { 
+    "host": "localhost", 
+    "user": "root", 
+    "password": "YOUR_MYSQL_PASSWORD", 
+    "database": "library_db" 
+} 
+ 
+FINE_PER_DAY = 5.0 
+ 
+def get_db(): 
+    return mysql.connector.connect(**DB) 
+ 
+def login_required(fn): 
+    @wraps(fn) 
+    def wrapper(*args, **kwargs): 
+        if "user_id" not in session: 
+            return redirect(url_for("login")) 
+        return fn(*args, **kwargs) 
+    return wrapper 
+ 
+@app.route("/") 
+def index(): 
+    return redirect(url_for("dashboard") if "user_id" in session else url_for("login")) 
+ 
+@app.route("/login", methods=["GET", "POST"]) 
+def login(): 
+    if request.method == "POST": 
+        username = request.form["username"].strip() 
+        password = request.form["password"] 
+        db = get_db() 
+        cur = db.cursor(dictionary=True) 
+        cur.execute("SELECT * FROM users WHERE username=%s", (username,)) 
+        user = cur.fetchone() 
+        cur.close(); db.close() 
+        if user and check_password_hash(user["password_hash"], password): 
+            session["user_id"] = user["user_id"] 
+            session["username"] = user["username"] 
+            return redirect(url_for("dashboard")) 
+        flash("Invalid username or password.", "danger") 
+    return render_template("login.html") 
+
+=== PAGE 15 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+ 
+@app.route("/logout") 
+def logout(): 
+    session.clear() 
+    return redirect(url_for("login")) 
+ 
+@app.route("/dashboard") 
+@login_required 
+def dashboard(): 
+    db = get_db(); cur = db.cursor() 
+    cur.execute("SELECT COUNT(*) FROM books"); books = cur.fetchone()[0] 
+    cur.execute("SELECT COUNT(*) FROM members"); members = cur.fetchone()[0] 
+    cur.execute("SELECT COUNT(*) FROM book_issues WHERE status='ISSUED'") 
+    issued = cur.fetchone()[0] 
+    cur.execute("SELECT COUNT(*) FROM book_issues WHERE status='ISSUED' AND due_date < 
+CURDATE()") 
+    overdue = cur.fetchone()[0] 
+    cur.close(); db.close() 
+    return render_template("dashboard.html", books=books, members=members, 
+                           issued=issued, overdue=overdue) 
+ 
+@app.route("/books", methods=["GET", "POST"]) 
+@login_required 
+def books(): 
+    db = get_db(); cur = db.cursor(dictionary=True) 
+    if request.method == "POST": 
+        title = request.form["title"].strip() 
+        author = request.form["author"].strip() 
+        isbn = request.form.get("isbn", "").strip() or None 
+        quantity = int(request.form["quantity"]) 
+        cur.execute("""INSERT INTO books 
+                    (isbn,title,author,quantity,available_quantity) 
+                    VALUES (%s,%s,%s,%s,%s)""", 
+                    (isbn,title,author,quantity,quantity)) 
+        db.commit() 
+        flash("Book added successfully.", "success") 
+    q = request.args.get("q", "").strip() 
+    if q: 
+        cur.execute("""SELECT * FROM books 
+                       WHERE title LIKE %s OR author LIKE %s OR isbn LIKE %s 
+                       ORDER BY title""", (f"%{q}%",f"%{q}%",f"%{q}%")) 
+    else: 
+        cur.execute("SELECT * FROM books ORDER BY title") 
+    rows = cur.fetchall() 
+    cur.close(); db.close() 
+    return render_template("books.html", books=rows, q=q) 
+ 
+@app.route("/members", methods=["GET", "POST"]) 
+@login_required 
+def members(): 
+    db = get_db(); cur = db.cursor(dictionary=True) 
+    if request.method == "POST": 
+        cur.execute("""INSERT INTO members(name,email,phone,address) 
+                       VALUES(%s,%s,%s,%s)""", 
+                    (request.form["name"], request.form["email"], 
+                     request.form["phone"], request.form["address"])) 
+        db.commit() 
+        flash("Member added successfully.", "success") 
+    cur.execute("SELECT * FROM members ORDER BY name") 
+    rows = cur.fetchall() 
+    cur.close(); db.close() 
+
+=== PAGE 16 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+    return render_template("members.html", members=rows) 
+ 
+@app.route("/issue", methods=["GET", "POST"]) 
+@login_required 
+def issue(): 
+    db = get_db(); cur = db.cursor(dictionary=True) 
+    if request.method == "POST": 
+        book_id = int(request.form["book_id"]) 
+        member_id = int(request.form["member_id"]) 
+        due_date = request.form["due_date"] 
+        cur.execute("""SELECT available_quantity FROM books 
+                       WHERE book_id=%s FOR UPDATE""", (book_id,)) 
+        book = cur.fetchone() 
+        cur.execute("SELECT status FROM members WHERE member_id=%s", (member_id,)) 
+        member = cur.fetchone() 
+        if not book or book["available_quantity"] <= 0: 
+            flash("Book is not available.", "danger") 
+        elif not member or member["status"] != "ACTIVE": 
+            flash("Member is not active.", "danger") 
+        else: 
+            cur.execute("""INSERT INTO book_issues 
+                       (book_id,member_id,issue_date,due_date,issued_by) 
+                       VALUES(%s,%s,CURDATE(),%s,%s)""", 
+                        (book_id,member_id,due_date,session["user_id"])) 
+            cur.execute("""UPDATE books SET available_quantity=available_quantity-1 
+                           WHERE book_id=%s""", (book_id,)) 
+            db.commit() 
+            flash("Book issued successfully.", "success") 
+    cur.execute("SELECT book_id,title,available_quantity FROM books WHERE 
+available_quantity>0") 
+    books = cur.fetchall() 
+    cur.execute("SELECT member_id,name FROM members WHERE status='ACTIVE' ORDER BY name") 
+    members = cur.fetchall() 
+    cur.close(); db.close() 
+    return render_template("issues.html", books=books, members=members) 
+ 
+@app.route("/return/<int:issue_id>", methods=["POST"]) 
+@login_required 
+def return_book(issue_id): 
+    db = get_db(); cur = db.cursor(dictionary=True) 
+    cur.execute("""SELECT * FROM book_issues 
+                   WHERE issue_id=%s AND status='ISSUED' FOR UPDATE""", (issue_id,)) 
+    issue = cur.fetchone() 
+    if not issue: 
+        flash("Active issue not found.", "danger") 
+    else: 
+        today = date.today() 
+        overdue_days = max((today - issue["due_date"]).days, 0) 
+        fine = overdue_days * FINE_PER_DAY 
+        cur.execute("""UPDATE book_issues 
+                       SET return_date=CURDATE(), fine=%s, status='RETURNED' 
+                       WHERE issue_id=%s""", (fine, issue_id)) 
+        cur.execute("""UPDATE books SET available_quantity=available_quantity+1 
+                       WHERE book_id=%s""", (issue["book_id"],)) 
+        db.commit() 
+        flash(f"Book returned. Fine: {fine:.2f}", "success") 
+    cur.close(); db.close() 
+    return redirect(url_for("dashboard")) 
+ 
+if __name__ == "__main__": 
+
+=== PAGE 17 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+    app.run(debug=True) 
+ 
+14.2 Base Template – templates/base.html 
+<!doctype html> 
+<html> 
+<head> 
+  <meta charset="utf-8"> 
+  <title>Library Management System</title> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+rel="stylesheet"> 
+</head> 
+<body> 
+<nav class="navbar navbar-dark bg-dark"> 
+  <div class="container"> 
+    <a class="navbar-brand" href="{{ url_for('dashboard') }}">Library Management</a> 
+    <a class="btn btn-outline-light" href="{{ url_for('logout') }}">Logout</a> 
+  </div> 
+</nav> 
+<div class="container py-4"> 
+  {% with messages = get_flashed_messages(with_categories=true) %} 
+    {% for category, message in messages %} 
+      <div class="alert alert-{{ category }}">{{ message }}</div> 
+    {% endfor %} 
+  {% endwith %} 
+  {% block content %}{% endblock %} 
+</div> 
+</body> 
+</html> 
+ 
+14.3 Login – templates/login.html 
+{% extends "base.html" %} 
+{% block content %} 
+<div class="row justify-content-center"> 
+  <div class="col-md-5"> 
+    <h2 class="mb-3">Administrator Login</h2> 
+    <form method="post"> 
+      <input class="form-control mb-2" name="username" placeholder="Username" required> 
+      <input class="form-control mb-2" type="password" name="password" 
+placeholder="Password" required> 
+      <button class="btn btn-primary w-100">Login</button> 
+    </form> 
+  </div> 
+</div> 
+{% endblock %} 
+ 
+14.4 Dashboard – templates/dashboard.html 
+{% extends "base.html" %} 
+{% block content %} 
+<h2>Dashboard</h2> 
+<div class="row g-3"> 
+  <div class="col-md-3"><div class="card p-3"><h5>Books</h5><h2>{{ books 
+}}</h2></div></div> 
+  <div class="col-md-3"><div class="card p-3"><h5>Members</h5><h2>{{ members 
+}}</h2></div></div> 
+  <div class="col-md-3"><div class="card p-3"><h5>Issued</h5><h2>{{ issued 
+
+=== PAGE 18 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+}}</h2></div></div> 
+  <div class="col-md-3"><div class="card p-3"><h5>Overdue</h5><h2>{{ overdue 
+}}</h2></div></div> 
+</div> 
+<div class="mt-4"> 
+  <a class="btn btn-primary" href="{{ url_for('books') }}">Books</a> 
+  <a class="btn btn-secondary" href="{{ url_for('members') }}">Members</a> 
+  <a class="btn btn-success" href="{{ url_for('issue') }}">Issue Book</a> 
+</div> 
+{% endblock %} 
+ 
+14.5 Books – templates/books.html 
+{% extends "base.html" %} 
+{% block content %} 
+<h2>Books</h2> 
+<form class="row g-2 mb-3" method="get"> 
+  <div class="col"><input class="form-control" name="q" value="{{ q }}" 
+placeholder="Search title, author or ISBN"></div> 
+  <div class="col-auto"><button class="btn btn-dark">Search</button></div> 
+</form> 
+<form method="post" class="row g-2 mb-4"> 
+  <div class="col"><input class="form-control" name="title" placeholder="Title" 
+required></div> 
+  <div class="col"><input class="form-control" name="author" placeholder="Author" 
+required></div> 
+  <div class="col"><input class="form-control" name="isbn" placeholder="ISBN"></div> 
+  <div class="col"><input class="form-control" type="number" min="1" name="quantity" 
+value="1" required></div> 
+  <div class="col-auto"><button class="btn btn-primary">Add Book</button></div> 
+</form> 
+<table class="table table-bordered"> 
+<tr><th>Title</th><th>Author</th><th>ISBN</th><th>Available</th></tr> 
+{% for b in books %} 
+<tr><td>{{ b.title }}</td><td>{{ b.author }}</td><td>{{ b.isbn or '' }}</td><td>{{ 
+b.available_quantity }}/{{ b.quantity }}</td></tr> 
+{% endfor %} 
+</table> 
+{% endblock %} 
+ 
+14.6 Members – templates/members.html 
+{% extends "base.html" %} 
+{% block content %} 
+<h2>Members</h2> 
+<form method="post" class="row g-2 mb-4"> 
+  <div class="col"><input class="form-control" name="name" placeholder="Name" 
+required></div> 
+  <div class="col"><input class="form-control" name="email" placeholder="Email"></div> 
+  <div class="col"><input class="form-control" name="phone" placeholder="Phone"></div> 
+  <div class="col"><input class="form-control" name="address" placeholder="Address"></div> 
+  <div class="col-auto"><button class="btn btn-primary">Add Member</button></div> 
+</form> 
+<table class="table table-bordered"> 
+<tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th></tr> 
+{% for m in members %} 
+<tr><td>{{ m.name }}</td><td>{{ m.email or '' }}</td><td>{{ m.phone or '' }}</td><td>{{ 
+m.status }}</td></tr> 
+{% endfor %} 
+</table> 
+
+=== PAGE 19 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+{% endblock %} 
+ 
+14.7 Issue Book – templates/issues.html 
+{% extends "base.html" %} 
+{% block content %} 
+<h2>Issue Book</h2> 
+<form method="post"> 
+  <label class="form-label">Book</label> 
+  <select class="form-select mb-2" name="book_id" required> 
+    {% for b in books %}<option value="{{ b.book_id }}">{{ b.title }} ({{ 
+b.available_quantity }} available)</option>{% endfor %} 
+  </select> 
+  <label class="form-label">Member</label> 
+  <select class="form-select mb-2" name="member_id" required> 
+    {% for m in members %}<option value="{{ m.member_id }}">{{ m.name }}</option>{% endfor 
+%} 
+  </select> 
+  <label class="form-label">Due date</label> 
+  <input class="form-control mb-3" type="date" name="due_date" required> 
+  <button class="btn btn-success">Issue Book</button> 
+</form> 
+{% endblock %} 
+ 
+14.8 Create Initial Administrator 
+from werkzeug.security import generate_password_hash 
+print(generate_password_hash("Admin@123")) 
+# Copy the printed hash and execute: 
+# INSERT INTO users(username,password_hash,role) 
+# VALUES ('admin','<GENERATED_HASH>','admin'); 
+ 
+15. TESTING 
+Testing verifies that the system satisfies its functional requirements and behaves correctly for valid and invalid 
+inputs. 
+Test ID Test Case Input/Action Expected Result Status 
+TC-01 Valid login Correct username/password Dashboard displayed Pass 
+TC-02 Invalid login Wrong password Error message displayed Pass 
+TC-03 Add book Valid title/author/quantity Book stored in database Pass 
+TC-04 Search book Keyword in title Matching books displayed Pass 
+TC-05 Add member Valid member details Member stored Pass 
+TC-06 Issue available book Active member + available book Issue created and availability decremented Pass 
+TC-07 Issue unavailable book Book availability = 0 Transaction rejected Pass 
+TC-08 Return book Valid active issue Return recorded Pass 
+
+=== PAGE 20 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+and availability 
+incremented 
+TC-09 Overdue fine Return after due date Fine = overdue days × configured rate Pass 
+TC-10 Unauthenticated route Open /dashboard without login Redirect to login Pass 
+15.1 Testing Levels 
+• Unit Testing – validate individual functions and calculations. 
+• Integration Testing – validate Flask/database interactions. 
+• System Testing – validate complete workflows. 
+• Security Testing – validate authentication, input handling and authorization. 
+• User Acceptance Testing – verify that librarians can perform their intended tasks. 
+16. SECURITY CONSIDERATIONS 
+• Use password hashing rather than storing plaintext passwords. 
+• Use parameterized SQL queries to reduce SQL injection risk. 
+• Keep the Flask secret key and database credentials outside source control in production. 
+• Use HTTPS in production. 
+• Implement role-based authorization for multiple user types. 
+• Validate and sanitize uploaded/input data. 
+• Use secure session configuration and appropriate cookie flags. 
+• Back up the database regularly and protect backup files. 
+• Update Python packages and the database server regularly. 
+17. DEPLOYMENT 
+17.1 Local Deployment 
+# 1. Create environment 
+python -m venv venv 
+ 
+# Windows 
+venv\Scripts\activate 
+ 
+# Linux/macOS 
+source venv/bin/activate 
+ 
+# 2. Install packages 
+pip install -r requirements.txt 
+
+=== PAGE 21 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+ 
+# 3. Create the database 
+mysql -u root -p < schema.sql 
+ 
+# 4. Edit DB settings in app.py 
+# 5. Run 
+python app.py 
+ 
+# 6. Open in browser 
+http://127.0.0.1:5000 
+ 
+17.2 Production Deployment Concept 
+For production, use a production WSGI server such as Gunicorn on Linux, place a reverse proxy such as 
+Nginx in front of the application, enable HTTPS, store secrets in environment variables, restrict database 
+access, configure backups and monitor application/database logs. 
+18. MAINTENANCE 
+Maintenance Type Example 
+Corrective Fix defects discovered after deployment. 
+Adaptive Update dependencies or support a new OS/database version. 
+Perfective Improve search, reports and user interface. 
+Preventive Backups, security patches, code refactoring and monitoring. 
+19. LIMITATIONS 
+• Reference implementation focuses on core circulation operations. 
+• The sample UI is intentionally simple and can be redesigned for institutional branding. 
+• Fine policy is represented by a configurable daily rate rather than institution-specific rules. 
+• Advanced reporting, barcode integration and notification services are not included in the minimal 
+implementation. 
+20. FUTURE ENHANCEMENTS 
+• Barcode and QR-code scanning for books and member cards. 
+• Email/SMS/WhatsApp due-date and overdue notifications. 
+• Online reservation and renewal. 
+• Member self-service portal. 
+• Fine payment integration. 
+• Role-based access for librarian, administrator and member. 
+
+=== PAGE 22 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+• Advanced analytics and circulation dashboards. 
+• Cloud deployment and managed database. 
+• Mobile/PWA interface. 
+• AI-assisted book recommendation and semantic search. 
+21. CONCLUSION 
+The Library Management System demonstrates how a common institutional workflow can be transformed into 
+a structured web application through the Software Development Life Cycle. The system centralizes books, 
+members and circulation transactions, reduces repetitive manual work and provides a foundation for reporting 
+and future automation. The Flask–MySQL implementation is suitable as a learning project and can be 
+extended with stronger authorization, notifications, barcode scanning, cloud deployment and analytics for real-
+world use. 
+22. REFERENCES 
+• Python Documentation – Python language and standard library reference. 
+• Flask Documentation – Web application framework documentation. 
+• MySQL Documentation – Relational database and SQL reference. 
+• Bootstrap Documentation – Responsive web UI framework. 
+• Werkzeug Documentation – Security utilities used by Flask applications. 
+• Pressman, R. S. & Maxim, B. R., Software Engineering: A Practitioner's Approach. 
+• Sommerville, I., Software Engineering. 
+23. VIVA-VOCE QUESTIONS AND ANSWERS 
+Q: What is a Library Management System? 
+A: A software system that manages library books, members and circulation transactions. 
+Q: What is SDLC? 
+A: Software Development Life Cycle is a structured process used to plan, analyze, design, implement, test, 
+deploy and maintain software. 
+Q: Why is MySQL used? 
+A: It provides structured relational storage, SQL querying, constraints and transaction support. 
+Q: Why Flask? 
+A: Flask is a lightweight Python web framework suitable for building modular web applications. 
+
+=== PAGE 23 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+Q: What is CRUD? 
+A: Create, Read, Update and Delete—the basic operations performed on application data. 
+Q: What is a primary key? 
+A: A field that uniquely identifies each record in a table. 
+Q: What is a foreign key? 
+A: A field that references a key in another table and helps maintain referential integrity. 
+Q: How is overdue fine calculated? 
+A: In this implementation, overdue days are multiplied by a configured daily fine rate. 
+Q: Why hash passwords? 
+A: Hashing avoids storing plaintext passwords and reduces the impact of database disclosure. 
+Q: What is a transaction? 
+A: A logical unit of database work that should be completed consistently, such as issuing a book and 
+decrementing availability. 
+Q: What is normalization? 
+A: Organizing relational data to reduce unnecessary duplication and update anomalies. 
+Q: What is authentication? 
+A: Verifying the identity of a user. 
+Q: What is authorization? 
+A: Determining what an authenticated user is allowed to access or perform. 
+Q: What is system testing? 
+A: Testing the complete integrated application against its requirements. 
+Q: What is preventive maintenance? 
+A: Maintenance activities intended to reduce future failures, such as security updates, backups and refactoring. 
+  
+
+=== PAGE 24 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+15. APPLICATION SCREENSHOTS 
+The following five UI captures correspond to the reference Library Management System implementation 
+described in this report. They illustrate the principal application screens used during demonstration: 
+authentication, dashboard, catalogue management, member management and circulation. 
+Figure 15.1 – Administrator Login 
+ 
+Screenshot 1: Administrator Login screen of the Library Management System. 
+  
+
+
+=== PAGE 25 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+Figure 15.2 – Dashboard 
+ 
+Screenshot 2: Dashboard screen of the Library Management System. 
+  
+
+
+=== PAGE 26 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+Figure 15.3 – Books Management 
+ 
+Screenshot 3: Books Management screen of the Library Management System. 
+  
+
+
+=== PAGE 27 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+Figure 15.4 – Member Management 
+ 
+Screenshot 4: Member Management screen of the Library Management System. 
+  
+
+
+=== PAGE 28 ===
+Library Management System – Project Report 
+Academic Project Report | 2026–2027 
+Figure 15.5 – Issue / Return Management 
+ 
+Screenshot 5: Issue / Return Management screen of the Library Management System. 
+
+
+=== PAGE 29 ===
+
+
+=== PAGE 30 ===
+
+

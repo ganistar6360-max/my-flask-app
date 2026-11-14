@@ -1,4 +1,4 @@
-﻿# Community Hall Booking & Management System
+# Community Hall Booking & Management System
 ## Academic Project Report & Engineering Documentation
 
 **Project Title:** Community Hall Booking & Management System  
